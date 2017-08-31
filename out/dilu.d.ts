@@ -1,12 +1,4 @@
 declare namespace dilu {
-    interface ValidateField {
-        rule: Rule;
-        display?: string;
-        message?: string;
-        depends?: (HTMLInputElement | (() => boolean))[];
-    }
-}
-declare namespace dilu {
     let errors: {
         argumentNull(parameterName: any): Error;
         ruleNotExists(name: string): Error;
