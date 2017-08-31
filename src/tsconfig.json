@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "declaration": true,
+        "module": "amd",
+        "sourceMap": false,
+        "target": "es6",
+        "outFile": "../out/dilu.js"
+    },
+    "exclude": [
+        "formValidator1.ts"
+    ]
+}

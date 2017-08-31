@@ -1,0 +1,11 @@
+{
+  "name": "dihu",
+  "version": "1.0.0",
+  "dependencies": {
+    "grunt": "^1.0.1",
+    "grunt-shell": "^2.1.0"
+  },
+  "devDependencies": {
+    "mocha-jsdom": "^1.1.0"
+  }
+}
