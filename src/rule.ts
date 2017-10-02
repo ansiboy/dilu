@@ -1,16 +1,18 @@
 namespace dilu {
     const errorClassName = 'validationMessage';
-
+    export type InputElement = HTMLElement & { value: string, name?: string };
     export class Rule {
         private _validate: (value: string) => boolean;
-        private _element: HTMLInputElement;
+        private _element: HTMLElement & { value: string };
         private _errorElement: HTMLElement;
         private _errorMessage: string;
+        // private _errorElement: HTMLElement;
 
-        constructor(element: HTMLInputElement, validate: (value: string) => boolean, errorMessage: string) {
+        constructor(element: InputElement, validate: (value: string) => boolean, errorMessage: string, errorELement?: HTMLElement) {
             this._element = element;
             this._validate = validate;
             this._errorMessage = errorMessage;
+            this._errorElement = errorELement;
         }
         get element() {
             return this._element;
@@ -21,7 +23,10 @@ namespace dilu {
                 this._errorElement.className = errorClassName;
                 this._errorElement.innerText = this._errorMessage;
                 this._errorElement.style.display = 'none';
-                document.body.insertBefore(this._errorElement, this.element.nextSibling);
+                if (this.element.nextSibling)
+                    this.element.parentElement.insertBefore(this._errorElement, this.element.nextSibling);
+                else
+                    this.element.parentElement.appendChild(this._errorElement);
             }
             return this._errorElement;
         }

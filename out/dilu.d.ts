@@ -10,7 +10,8 @@ declare namespace dilu {
         rule: Rule;
         display?: string;
         message?: string;
-        depends?: (HTMLInputElement | (() => boolean))[];
+        depends?: (HTMLElement | (() => boolean))[];
+        errorElement?: HTMLElement;
     }
     class FormValidator {
         private fields;
@@ -18,18 +19,24 @@ declare namespace dilu {
         clearErrors(): void;
         clearElementError(element: HTMLInputElement): void;
         check(): boolean;
-        checkElement(element: HTMLInputElement): boolean;
+        checkElement(inputElement: HTMLInputElement): boolean;
         private getElementValidators(element);
     }
 }
 declare namespace dilu {
+    type InputElement = HTMLElement & {
+        value: string;
+        name?: string;
+    };
     class Rule {
         private _validate;
         private _element;
         private _errorElement;
         private _errorMessage;
-        constructor(element: HTMLInputElement, validate: (value: string) => boolean, errorMessage: string);
-        readonly element: HTMLInputElement;
+        constructor(element: InputElement, validate: (value: string) => boolean, errorMessage: string, errorELement?: HTMLElement);
+        readonly element: HTMLElement & {
+            value: string;
+        };
         readonly errorElement: HTMLElement;
         readonly errorMessage: string;
         check(): boolean;
@@ -43,19 +50,19 @@ declare namespace dilu {
         message?: string;
     };
     let rules: {
-        required: (element: HTMLInputElement, options?: Options) => Rule;
-        matches: (element: HTMLInputElement, otherElement: HTMLInputElement, options?: Options) => Rule;
-        email: (element: HTMLInputElement, options?: Options) => Rule;
-        minLength: (element: HTMLInputElement, length: number, options?: Options) => Rule;
-        maxLength: (element: HTMLInputElement, length: number, options?: Options) => Rule;
-        greaterThan: (element: HTMLInputElement, value: number | Date, options: Options) => Rule;
-        lessThan: (element: HTMLInputElement, value: string | number | Date, options: Options) => Rule;
-        equal: (element: HTMLInputElement, value: string | number | Date, options?: Options) => Rule;
-        ip: (element: HTMLInputElement, options: Options) => Rule;
-        url: (element: HTMLInputElement, options?: Options) => Rule;
-        mobile: (element: HTMLInputElement, options?: Options) => {
+        required: (element: InputElement, options?: Options) => Rule;
+        matches: (element: InputElement, otherElement: InputElement, options?: Options) => Rule;
+        email: (element: InputElement, options?: Options) => Rule;
+        minLength: (element: InputElement, length: number, options?: Options) => Rule;
+        maxLength: (element: InputElement, length: number, options?: Options) => Rule;
+        greaterThan: (element: InputElement, value: number | Date, options: Options) => Rule;
+        lessThan: (element: InputElement, value: string | number | Date, options: Options) => Rule;
+        equal: (element: InputElement, value: string | number | Date, options?: Options) => Rule;
+        ip: (element: InputElement, options: Options) => Rule;
+        url: (element: InputElement, options?: Options) => Rule;
+        mobile: (element: InputElement, options?: Options) => {
             name: string;
-            element: HTMLInputElement;
+            element: InputElement;
             display: string;
             messages: {
                 'mobile': string;

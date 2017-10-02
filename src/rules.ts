@@ -54,7 +54,7 @@ namespace dilu {
         message?: string
     }
 
-    let errorMessage = (pattern: string, element: HTMLInputElement, options: Options) => {
+    let errorMessage = (pattern: string, element: InputElement, options: Options) => {
         options = options || {};
         if (options.message)
             return options.message;
@@ -64,48 +64,52 @@ namespace dilu {
     }
 
     export let rules = {
-        required: function (element: HTMLInputElement, options?: Options): Rule {
+        required: function (element: InputElement, options?: Options): Rule {
             if (!element) throw errors.argumentNull('element');
 
             let message = errorMessage(msgs.required, element, options);
             let validate = () => (element.value || '') != '';;
-            return createInputValidator(element, msgs.required, validate, options);
+            return new Rule(element, validate, message);
         },
-        matches: function (element: HTMLInputElement, otherElement: HTMLInputElement, options?: Options): Rule {
+        matches: function (element: InputElement, otherElement: InputElement, options?: Options): Rule {
             if (!element) throw errors.argumentNull('element');
             if (!otherElement) throw errors.argumentNull('otherElement');
 
+            let message = errorMessage(msgs.matches, element, options);
             var validate = () => element.value == otherElement.value;
-            return createInputValidator(element, msgs.matches, validate, options);
+            return new Rule(element, validate, message);
         },
-        email: function (element: HTMLInputElement, options?: Options): Rule {
+        email: function (element: InputElement, options?: Options): Rule {
             if (!element) throw errors.argumentNull('element');
 
             let message = errorMessage(msgs.email, element, options);
             var validate = () => emailRegex.test(element.value);
             return new Rule(element, validate, message);
         },
-        minLength: function (element: HTMLInputElement, length: number, options?: Options) {
+        minLength: function (element: InputElement, length: number, options?: Options) {
             if (!element) throw errors.argumentNull('element');
 
+            let message = errorMessage(msgs.minLength, element, options);
             var validate = () => (element.value || '').length >= length;
-            return createInputValidator(element, msgs.minLength, validate, options);
+            return new Rule(element, validate, message);
         },
-        maxLength: function (element: HTMLInputElement, length: number, options?: Options) {
+        maxLength: function (element: InputElement, length: number, options?: Options) {
             if (!element) throw errors.argumentNull('element');
 
+            let message = errorMessage(msgs.maxLength, element, options);
             var validate = () => (element.value || '').length <= length;
-            return createInputValidator(element, msgs.maxLength, validate, options);
+            return new Rule(element, validate, message);
         },
-        greaterThan: function (element: HTMLInputElement, value: number | Date, options: Options) {
+        greaterThan: function (element: InputElement, value: number | Date, options: Options) {
             if (!element) throw errors.argumentNull('element');
             if (value == null) throw errors.argumentNull('value');
 
+            let message = errorMessage(msgs.greater_than, element, options);
             var validate = () => elementValueCompare(element, value) == 'greaterThan';
 
-            return createInputValidator(element, msgs.greater_than, validate, options);
+            return new Rule(element, validate, message);
         },
-        lessThan: function (element: HTMLInputElement, value: number | Date | string, options: Options) {
+        lessThan: function (element: InputElement, value: number | Date | string, options: Options) {
             if (!element) throw errors.argumentNull('element');
 
             let message = errorMessage(msgs.email, element, options);
@@ -113,7 +117,7 @@ namespace dilu {
 
             return new Rule(element, validate, message);
         },
-        equal: function (element: HTMLInputElement, value: number | Date | string, options?: Options) {
+        equal: function (element: InputElement, value: number | Date | string, options?: Options) {
             if (!element) throw errors.argumentNull('element');
             if (value == null) throw errors.argumentNull('value');
 
@@ -122,7 +126,7 @@ namespace dilu {
 
             return new Rule(element, validate, message);
         },
-        ip: function (element: HTMLInputElement, options: Options) {
+        ip: function (element: InputElement, options: Options) {
             if (!element) throw errors.argumentNull('element');
 
             let message = errorMessage(msgs.ip, element, options);
@@ -130,13 +134,13 @@ namespace dilu {
 
             return new Rule(element, validate, message);
         },
-        url: function (element: HTMLInputElement, options?: Options) {
+        url: function (element: InputElement, options?: Options) {
             if (!element) throw errors.argumentNull('element');
             let message = errorMessage(msgs.email, element, options);
             var validate = () => urlRegex.test(element.value);
             return new Rule(element, validate, message);
         },
-        mobile: function (element: HTMLInputElement, options?: Options) {
+        mobile: function (element: InputElement, options?: Options) {
             options = options || {};
             return {
                 name: element.name,
@@ -148,14 +152,7 @@ namespace dilu {
         },
     };
 
-
-    function createInputValidator(element: HTMLInputElement, errorPattern: string, validate: () => boolean, options: Options) {
-        if (!element) throw errors.argumentNull('element');
-        let message = errorMessage(msgs.email, element, options);
-        return new Rule(element, validate, message);
-    }
-
-    function elementValueCompare<T extends number | Date | string>(element: HTMLInputElement, value: T): 'lessThan' | 'greaterThan' | 'equal' {
+    function elementValueCompare<T extends number | Date | string>(element: InputElement, value: T): 'lessThan' | 'greaterThan' | 'equal' {
 
         let elementValue: number | Date | string;
         if (typeof value == 'number') {

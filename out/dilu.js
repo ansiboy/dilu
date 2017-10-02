@@ -31,30 +31,28 @@ var dilu;
                 .forEach(o => o.rule.hideError());
         }
         check() {
+            var result = true;
             for (let i = 0; i < this.fields.length; i++) {
                 let field = this.fields[i];
                 let depends = field.depends || [];
+                let dependIsOK = true;
                 for (let j = 0; j < depends.length; j++) {
-                    let dependIsOK;
                     if (typeof depends[j] == 'function') {
-                        dependIsOK = depends[i]();
+                        dependIsOK = depends[j]();
                     }
                     else {
                         dependIsOK = this.checkElement(depends[j]);
                     }
-                    if (!dependIsOK)
-                        return false;
                 }
-                if (!this.fields[i].rule.check())
-                    return false;
+                result = dependIsOK ? this.fields[i].rule.check() : false;
             }
-            return true;
+            return result;
         }
         ;
-        checkElement(element) {
-            let itemValidators = this.getElementValidators(element);
+        checkElement(inputElement) {
+            let itemValidators = this.getElementValidators(inputElement);
             if (itemValidators.length == 0)
-                throw dilu.errors.elementValidateRuleNotSet(element);
+                throw dilu.errors.elementValidateRuleNotSet(inputElement);
             var checkFails = itemValidators.map(o => o.check()).filter(chechSuccess => !chechSuccess);
             return checkFails.length == 0;
         }
@@ -68,10 +66,12 @@ var dilu;
 (function (dilu) {
     const errorClassName = 'validationMessage';
     class Rule {
-        constructor(element, validate, errorMessage) {
+        // private _errorElement: HTMLElement;
+        constructor(element, validate, errorMessage, errorELement) {
             this._element = element;
             this._validate = validate;
             this._errorMessage = errorMessage;
+            this._errorElement = errorELement;
         }
         get element() {
             return this._element;
@@ -82,7 +82,10 @@ var dilu;
                 this._errorElement.className = errorClassName;
                 this._errorElement.innerText = this._errorMessage;
                 this._errorElement.style.display = 'none';
-                document.body.insertBefore(this._errorElement, this.element.nextSibling);
+                if (this.element.nextSibling)
+                    this.element.parentElement.insertBefore(this._errorElement, this.element.nextSibling);
+                else
+                    this.element.parentElement.appendChild(this._errorElement);
             }
             return this._errorElement;
         }
@@ -155,15 +158,16 @@ var dilu;
             let message = errorMessage(msgs.required, element, options);
             let validate = () => (element.value || '') != '';
             ;
-            return createInputValidator(element, msgs.required, validate, options);
+            return new dilu.Rule(element, validate, message);
         },
         matches: function (element, otherElement, options) {
             if (!element)
                 throw dilu.errors.argumentNull('element');
             if (!otherElement)
                 throw dilu.errors.argumentNull('otherElement');
+            let message = errorMessage(msgs.matches, element, options);
             var validate = () => element.value == otherElement.value;
-            return createInputValidator(element, msgs.matches, validate, options);
+            return new dilu.Rule(element, validate, message);
         },
         email: function (element, options) {
             if (!element)
@@ -175,22 +179,25 @@ var dilu;
         minLength: function (element, length, options) {
             if (!element)
                 throw dilu.errors.argumentNull('element');
+            let message = errorMessage(msgs.minLength, element, options);
             var validate = () => (element.value || '').length >= length;
-            return createInputValidator(element, msgs.minLength, validate, options);
+            return new dilu.Rule(element, validate, message);
         },
         maxLength: function (element, length, options) {
             if (!element)
                 throw dilu.errors.argumentNull('element');
+            let message = errorMessage(msgs.maxLength, element, options);
             var validate = () => (element.value || '').length <= length;
-            return createInputValidator(element, msgs.maxLength, validate, options);
+            return new dilu.Rule(element, validate, message);
         },
         greaterThan: function (element, value, options) {
             if (!element)
                 throw dilu.errors.argumentNull('element');
             if (value == null)
                 throw dilu.errors.argumentNull('value');
+            let message = errorMessage(msgs.greater_than, element, options);
             var validate = () => elementValueCompare(element, value) == 'greaterThan';
-            return createInputValidator(element, msgs.greater_than, validate, options);
+            return new dilu.Rule(element, validate, message);
         },
         lessThan: function (element, value, options) {
             if (!element)
@@ -233,12 +240,6 @@ var dilu;
             };
         },
     };
-    function createInputValidator(element, errorPattern, validate, options) {
-        if (!element)
-            throw dilu.errors.argumentNull('element');
-        let message = errorMessage(msgs.email, element, options);
-        return new dilu.Rule(element, validate, message);
-    }
     function elementValueCompare(element, value) {
         let elementValue;
         if (typeof value == 'number') {

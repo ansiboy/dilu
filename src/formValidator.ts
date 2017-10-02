@@ -1,10 +1,13 @@
 namespace dilu {
 
+
+
     export interface ValidateField {
         rule: Rule,
         display?: string,
         message?: string,
-        depends?: (HTMLInputElement | (() => boolean))[]
+        depends?: (HTMLElement | (() => boolean))[],
+        errorElement?: HTMLElement
     }
 
     export class FormValidator {
@@ -26,36 +29,33 @@ namespace dilu {
         }
 
         check() {
+            var result = true;
             for (let i = 0; i < this.fields.length; i++) {
                 let field = this.fields[i];
                 let depends = field.depends || [];
+
+                let dependIsOK = true;
                 for (let j = 0; j < depends.length; j++) {
-                    let dependIsOK: boolean;
                     if (typeof depends[j] == 'function') {
-                        dependIsOK = (depends[i] as Function)();
+                        dependIsOK = (depends[j] as Function)();
                     }
                     else {
                         dependIsOK = this.checkElement(depends[j] as HTMLInputElement);
                     }
-
-                    if (!dependIsOK)
-                        return false;
                 }
 
-                if (!this.fields[i].rule.check())
-                    return false;
+                result = dependIsOK ? this.fields[i].rule.check() : false;
             }
 
-            return true;
+            return result;
 
         };
 
-        checkElement(element: HTMLInputElement): boolean {
-            let itemValidators = this.getElementValidators(element);
-
+        checkElement(inputElement: HTMLInputElement): boolean {
+            let itemValidators = this.getElementValidators(inputElement);
 
             if (itemValidators.length == 0)
-                throw errors.elementValidateRuleNotSet(element);
+                throw errors.elementValidateRuleNotSet(inputElement);
 
             var checkFails = itemValidators.map(o => o.check()).filter(chechSuccess => !chechSuccess);
             return checkFails.length == 0;
