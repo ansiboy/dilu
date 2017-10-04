@@ -10,7 +10,7 @@ module.exports = function (grunt) {
                     keepalive: true,
                     // livereload: 35729,
                     // 物理路径(默认为. 即根目录) 注：使用'.'或'..'为路径的时，可能会返回403 Forbidden. 此时将该值改为相对路径 如：/grunt/reloard。
-                    base: 'examples',
+                    base: 'example',
                     open: true//,hashchange
                 }
             }
@@ -19,7 +19,10 @@ module.exports = function (grunt) {
             out: {
                 files: [{
                     src: 'out/dilu.js',
-                    dest: 'example/dilu.js'
+                    dest: 'example/js/dilu.js'
+                }, {
+                    src: 'out/dilu.d.ts',
+                    dest: 'example/js/dilu.d.ts'
                 }]
 
             }

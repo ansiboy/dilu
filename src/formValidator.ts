@@ -1,68 +1,132 @@
 namespace dilu {
 
+    export type InputElement = HTMLElement & { name: string, value: string };
 
+    const errorClassName = 'validateMessage';
 
-    export interface ValidateField {
-        rule: Rule,
-        display?: string,
-        message?: string,
-        depends?: (HTMLElement | (() => boolean))[],
-        errorElement?: HTMLElement
-    }
+    export type ValidateField = {
+        element: InputElement,
+        rules: Rule[],
+        errorElement?: HTMLElement,
+        depends?: ((() => Promise<boolean>) | (() => boolean))[]
+    };
 
     export class FormValidator {
         private fields: ValidateField[];
         constructor(...fields: ValidateField[]) {
-            this.fields = fields;
+
+            for (let i = 0; i < fields.length; i++) {
+
+                let element = fields[i].element;
+                if (element == null) {
+                    throw errors.fieldElementCanntNull(i);
+                }
+
+                let errorElement: HTMLElement = fields[i].errorElement;
+                if (errorElement == null) {
+                    errorElement = document.createElement("span");
+                    errorElement.className = errorClassName;
+                    errorElement.style.display = 'none';
+                    if (element.nextSibling)
+                        element.parentElement.insertBefore(errorElement, element.nextSibling);
+                    else
+                        element.parentElement.appendChild(errorElement);
+
+                    fields[i].errorElement = errorElement;
+                }
+
+
+
+                fields[i].depends = fields[i].depends || [];
+            }
+
+            this.fields = fields || [];
         }
 
         clearErrors() {
-            this.fields.map(o => o.rule).forEach(o => o.hideError());
+            this.fields.map(o => o.errorElement).forEach(o => o.style.display = 'none');
         }
 
         clearElementError(element: HTMLInputElement) {
             if (element == null) throw errors.argumentNull('element');
-
-            this.fields
-                .filter(o => o.rule.element == element)
-                .forEach(o => o.rule.hideError());
+            let field = this.fields.filter(o => o.element == element)[0];
+            if (field)
+                field.errorElement.style.display = 'none';
         }
 
-        check() {
-            var result = true;
+        async  check() {
+            let ps = new Array<Promise<any>>();
             for (let i = 0; i < this.fields.length; i++) {
                 let field = this.fields[i];
-                let depends = field.depends || [];
-
-                let dependIsOK = true;
-                for (let j = 0; j < depends.length; j++) {
-                    if (typeof depends[j] == 'function') {
-                        dependIsOK = (depends[j] as Function)();
-                    }
-                    else {
-                        dependIsOK = this.checkElement(depends[j] as HTMLInputElement);
-                    }
-                }
-
-                result = dependIsOK ? this.fields[i].rule.check() : false;
+                let p = this.checkField(field);
+                ps.push(p);
             }
 
+            let checkResults = await Promise.all(ps);
+            let result = checkResults.filter(o => o == false).length == 0;
             return result;
-
         };
 
-        checkElement(inputElement: HTMLInputElement): boolean {
-            let itemValidators = this.getElementValidators(inputElement);
+        private async checkField(field: ValidateField): Promise<boolean> {
 
-            if (itemValidators.length == 0)
-                throw errors.elementValidateRuleNotSet(inputElement);
+            let depends = field.depends;
+            console.assert(depends != null, 'depends is null');
 
-            var checkFails = itemValidators.map(o => o.check()).filter(chechSuccess => !chechSuccess);
-            return checkFails.length == 0;
+            for (let j = 0; j < depends.length; j++) {
+                let dependResult = depends[j]();
+                if (typeof dependResult == 'boolean') {
+                    dependResult = Promise.resolve(dependResult);
+                }
+
+                let dependIsOK = await dependResult;
+                if (!dependIsOK)
+                    return false;
+            }
+
+            // let result = true;
+            let ps = new Array<Promise<any>>();
+            for (let j = 0; j < field.rules.length; j++) {
+                let rule = field.rules[j];
+                let p = rule.validate(field.element.value);
+                if (typeof p == 'boolean') {
+                    p = Promise.resolve(p);
+                }
+
+                let isPass = await p;
+                // result = isPass == false ? false : result;
+
+                let errorElement: HTMLElement;
+                if (typeof rule.error == 'string') {
+                    errorElement = field.errorElement;
+                    errorElement.innerHTML = rule.error.replace('%s', field.element.name);
+                }
+                else {
+                    errorElement = rule.error;
+                }
+
+                console.assert(errorElement != null, 'errorElement cannt be null.');
+
+                if (isPass == false) {
+                    errorElement.style.removeProperty('display');
+                }
+                else {
+                    errorElement.style.display = 'none';
+                }
+
+                if (!isPass)
+                    return false;
+            }
+
+            return true;
         }
 
-        private getElementValidators(element: HTMLElement) {
-            return this.fields.map(o => o.rule).filter(o => o.element == element);
+        checkElement(inputElement: HTMLInputElement): Promise<boolean> {
+            if (!inputElement) throw errors.argumentNull('inputElement');
+            let field = this.fields.filter(o => o.element == inputElement)[0];
+            if (!field)
+                throw errors.elementValidateRuleNotSet(inputElement);
+
+            return this.checkField(field);
         }
     }
 }

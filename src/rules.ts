@@ -14,17 +14,18 @@ namespace dilu {
         base64Regex = /[^a-zA-Z0-9\/\+=]/i,
         numericDashRegex = /^[\d\-\s]+$/,
         urlRegex = /^((http|https):\/\/(\w+:{0,1}\w*@)?(\S+)|)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/,
+        mobileRegex = /^1[34578]\d{9}$/,
         dateRegex = /\d{4}-\d{1,2}-\d{1,2}/;
 
     let msgs = {
-        required: '%s 不允许为空',
-        matches: '%s 与 %s 不匹配',
+        required: '%s不能为空',
+        matches: '%s与%s不匹配',
         "default": 'The %s field is still set to default, please change.',
-        equal: '%s 字段 和 %s 必须相同',
-        email: '%s 不是有效的邮箱地址',
+        equal: '%s和%s必须相同',
+        email: '不是有效的邮箱地址',
         valid_emails: 'The %s field must contain all valid email addresses.',
-        minLength: '%s 至少包含 %s 个字符',
-        maxLength: '%s 不能超过 %s 字符',
+        minLength: '%s至少包含%s个字符',
+        maxLength: '%s不能超过%s字符',
         exact_length: 'The %s field must be exactly %s characters in length.',
         greater_than: 'The %s field must contain a number greater than %s.',
         less_than: 'The %s field must contain a number less than %s.',
@@ -45,129 +46,88 @@ namespace dilu {
         less_than_date: 'The %s field must contain an older date than %s.',
         greater_than_or_equal_date: 'The %s field must contain a date that\'s at least as recent as %s.',
         less_than_or_equal_date: 'The %s field must contain a date that\'s %s or older.',
-        mobile: '%s 不是有效的手机号码'
+        mobile: '请输入正确的手机号码'
     }
 
 
-    export type Options = {
-        display?: string,
-        message?: string
+    export type RuleError = string;
+    export type Validate = (value) => boolean | Promise<boolean>;
+    export type RuleDepend = Rule | (() => boolean);
+    export type Rule = {
+        validate: (value) => boolean | Promise<boolean>,
+        error?: RuleError,
     }
 
-    let errorMessage = (pattern: string, element: InputElement, options: Options) => {
-        options = options || {};
-        if (options.message)
-            return options.message;
-
-        let display = options.display || element.name || '';
-        return pattern.replace('%s', display);
+    function createValidation(validate, error: RuleError): Rule {
+        return {
+            validate: validate,
+            error: error
+        }
     }
-
+    
     export let rules = {
-        required: function (element: InputElement, options?: Options): Rule {
-            if (!element) throw errors.argumentNull('element');
-
-            let message = errorMessage(msgs.required, element, options);
-            let validate = () => (element.value || '') != '';;
-            return new Rule(element, validate, message);
+        required(error?: RuleError) {
+            let validate = (value) => value != '';
+            return createValidation(validate, error || msgs.required);
         },
-        matches: function (element: InputElement, otherElement: InputElement, options?: Options): Rule {
-            if (!element) throw errors.argumentNull('element');
-            if (!otherElement) throw errors.argumentNull('otherElement');
-
-            let message = errorMessage(msgs.matches, element, options);
-            var validate = () => element.value == otherElement.value;
-            return new Rule(element, validate, message);
+        matches: function (otherElement: InputElement, error?: RuleError): Rule {
+            var validate = (value: string) => value == otherElement.value;
+            return createValidation(validate, error || msgs.required);
         },
-        email: function (element: InputElement, options?: Options): Rule {
-            if (!element) throw errors.argumentNull('element');
-
-            let message = errorMessage(msgs.email, element, options);
-            var validate = () => emailRegex.test(element.value);
-            return new Rule(element, validate, message);
+        email: function (error?: RuleError): Rule {
+            var validate = (value) => emailRegex.test(value);
+            return createValidation(validate, error || msgs.required);
         },
-        minLength: function (element: InputElement, length: number, options?: Options) {
-            if (!element) throw errors.argumentNull('element');
-
-            let message = errorMessage(msgs.minLength, element, options);
-            var validate = () => (element.value || '').length >= length;
-            return new Rule(element, validate, message);
+        minLength: function (length: number, error?: RuleError): Rule {
+            var validate = (value) => (value || '').length >= length;
+            return createValidation(validate, error || msgs.minLength);
         },
-        maxLength: function (element: InputElement, length: number, options?: Options) {
-            if (!element) throw errors.argumentNull('element');
-
-            let message = errorMessage(msgs.maxLength, element, options);
-            var validate = () => (element.value || '').length <= length;
-            return new Rule(element, validate, message);
+        maxLength: function (length: number, error?: RuleError) {
+            var validate = (value) => (value || '').length <= length;
+            return createValidation(validate, error || msgs.matches);
         },
-        greaterThan: function (element: InputElement, value: number | Date, options: Options) {
-            if (!element) throw errors.argumentNull('element');
-            if (value == null) throw errors.argumentNull('value');
-
-            let message = errorMessage(msgs.greater_than, element, options);
-            var validate = () => elementValueCompare(element, value) == 'greaterThan';
-
-            return new Rule(element, validate, message);
+        greaterThan: function (value: number | Date, error: RuleError) {
+            var validate = (o) => elementValueCompare(o, value) == 'greaterThan';
+            return createValidation(validate, error || msgs.greater_than);
         },
-        lessThan: function (element: InputElement, value: number | Date | string, options: Options) {
-            if (!element) throw errors.argumentNull('element');
-
-            let message = errorMessage(msgs.email, element, options);
-            var validate = () => elementValueCompare(element, value) == 'lessThan';
-
-            return new Rule(element, validate, message);
+        lessThan: function (value: number | Date | string, error: RuleError) {
+            var validate = (o) => elementValueCompare(o, value) == 'lessThan';
+            return createValidation(validate, error || msgs.less_than);
         },
-        equal: function (element: InputElement, value: number | Date | string, options?: Options) {
-            if (!element) throw errors.argumentNull('element');
-            if (value == null) throw errors.argumentNull('value');
-
-            let message = errorMessage(msgs.equal, element, options);
-            var validate = () => elementValueCompare(element, value) == 'greaterThan';
-
-            return new Rule(element, validate, message);
+        equal: function (value: number | Date | string, error?: RuleError) {
+            var validate = (o) => elementValueCompare(o, value) == 'greaterThan';
+            return createValidation(validate, error || msgs.equal);
         },
-        ip: function (element: InputElement, options: Options) {
-            if (!element) throw errors.argumentNull('element');
-
-            let message = errorMessage(msgs.ip, element, options);
-            var validate = () => ipRegex.test(element.value);
-
-            return new Rule(element, validate, message);
+        ip: function (error: RuleError): Rule {
+            var validate = (value) => ipRegex.test(value);
+            return createValidation(validate, error || msgs.ip);
         },
-        url: function (element: InputElement, options?: Options) {
-            if (!element) throw errors.argumentNull('element');
-            let message = errorMessage(msgs.email, element, options);
-            var validate = () => urlRegex.test(element.value);
-            return new Rule(element, validate, message);
+        url: function (error?: RuleError): Rule {
+            var validate = (value) => urlRegex.test(value);
+            return createValidation(validate, error || msgs.valid_url);
         },
-        mobile: function (element: InputElement, options?: Options) {
-            options = options || {};
-            return {
-                name: element.name,
-                element: element,
-                display: options.display,
-                messages: { 'mobile': options.message },
-                rules: ['mobile']
-            }
+        mobile: function (error?: RuleError): Rule {
+            var validate = (value) => mobileRegex.test(value);
+            return createValidation(validate, error || msgs.mobile);
         },
     };
 
-    function elementValueCompare<T extends number | Date | string>(element: InputElement, value: T): 'lessThan' | 'greaterThan' | 'equal' {
+    function elementValueCompare<T extends number | Date | string>(value: string, otherValue: T): 'lessThan' | 'greaterThan' | 'equal' {
 
         let elementValue: number | Date | string;
-        if (typeof value == 'number') {
-            elementValue = decimalRegex.test(element.value) ? parseFloat(element.value) : null;
+        if (typeof otherValue == 'number') {
+            elementValue = decimalRegex.test(value) ? parseFloat(value) : null;
         }
-        else if (typeof value == 'string') {
-            elementValue = element.value;
+        else if (typeof otherValue == 'string') {
+            elementValue = value;
         }
         else {
-            elementValue = getValidDate(element.value);
+            elementValue = getValidDate(value);
         }
 
-        if (elementValue < value)
+        if (elementValue < otherValue)
             return 'lessThan';
-        else if (elementValue > value)
+        else if (elementValue > otherValue)
             return 'greaterThan';
         else
             return 'equal';
