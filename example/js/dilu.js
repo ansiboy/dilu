@@ -13,9 +13,6 @@ var dilu;
             let msg = `Parameter ${parameterName} can not be null or empty.`;
             return new Error(msg);
         },
-        ruleNotExists(name) {
-            return new Error(`Rule named ${name} is not exists.`);
-        },
         elementValidateRuleNotSet(element) {
             let msg = `元素'${element.name}'没有设置验证规则`;
             return new Error(msg);
@@ -28,9 +25,12 @@ var dilu;
 })(dilu || (dilu = {}));
 var dilu;
 (function (dilu) {
-    const errorClassName = 'validateMessage';
     class FormValidator {
         constructor(...fields) {
+            this.fields = [];
+            this.addFields(...fields);
+        }
+        addFields(...fields) {
             for (let i = 0; i < fields.length; i++) {
                 let element = fields[i].element;
                 if (element == null) {
@@ -39,7 +39,7 @@ var dilu;
                 let errorElement = fields[i].errorElement;
                 if (errorElement == null) {
                     errorElement = document.createElement("span");
-                    errorElement.className = errorClassName;
+                    errorElement.className = FormValidator.errorClassName;
                     errorElement.style.display = 'none';
                     if (element.nextSibling)
                         element.parentElement.insertBefore(errorElement, element.nextSibling);
@@ -49,7 +49,7 @@ var dilu;
                 }
                 fields[i].depends = fields[i].depends || [];
             }
-            this.fields = fields || [];
+            fields.forEach(o => this.fields.push(o));
         }
         clearErrors() {
             this.fields.map(o => o.errorElement).forEach(o => o.style.display = 'none');
@@ -128,6 +128,7 @@ var dilu;
             return this.checkField(field);
         }
     }
+    FormValidator.errorClassName = 'validateMessage';
     dilu.FormValidator = FormValidator;
 })(dilu || (dilu = {}));
 var dilu;
@@ -148,7 +149,7 @@ var dilu;
         alpha: 'The %s field must only contain alphabetical characters.',
         alpha_numeric: 'The %s field must only contain alpha-numeric characters.',
         alpha_dash: 'The %s field must only contain alpha-numeric characters, underscores, and dashes.',
-        numeric: 'The %s field must contain only numbers.',
+        numeric: '请数入数字',
         integer: 'The %s field must contain an integer.',
         decimal: 'The %s field must contain a decimal number.',
         is_natural: 'The %s field must contain only positive numbers.',
@@ -164,31 +165,24 @@ var dilu;
         less_than_or_equal_date: 'The %s field must contain a date that\'s %s or older.',
         mobile: '请输入正确的手机号码'
     };
-    function createValidation(validate, error, depends) {
+    function createValidation(validate, error) {
         return {
             validate: validate,
             error: error
         };
     }
-    // let a = { m: (() => boolean) };
     dilu.rules = {
-        required(error, depends) {
+        required(error) {
             let validate = (value) => value != '';
-            return createValidation(validate, error || msgs.required, depends);
+            return createValidation(validate, error || msgs.required);
         },
         matches: function (otherElement, error) {
-            // if (!element) throw errors.argumentNull('element');
-            // if (!otherElement) throw errors.argumentNull('otherElement');
-            // let message = errorMessage(msgs.matches, element, options);
             var validate = (value) => value == otherElement.value;
             return createValidation(validate, error || msgs.required);
         },
         email: function (error) {
-            // if (!element) throw errors.argumentNull('element');
-            // let message = errorMessage(msgs.email, element, options);
             var validate = (value) => emailRegex.test(value);
             return createValidation(validate, error || msgs.required);
-            // return new Rule(validate, message);
         },
         minLength: function (length, error) {
             var validate = (value) => (value || '').length >= length;
@@ -222,6 +216,13 @@ var dilu;
             var validate = (value) => mobileRegex.test(value);
             return createValidation(validate, error || msgs.mobile);
         },
+        numeric: function (error) {
+            var validate = (value) => numericRegex.test(value);
+            return createValidation(validate, error || msgs.numeric);
+        },
+        custom: function (validate, error) {
+            return createValidation(validate, error);
+        }
     };
     function elementValueCompare(value, otherValue) {
         let elementValue;
