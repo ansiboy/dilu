@@ -2,7 +2,7 @@ namespace dilu {
 
     export type InputElement = HTMLElement & { name: string, value: string };
 
-    const errorClassName = 'validateMessage';
+    // export const errorClassName = 'validateMessage';
 
     export type ValidateField = {
         element: InputElement,
@@ -12,9 +12,16 @@ namespace dilu {
     };
 
     export class FormValidator {
+        static errorClassName = 'validateMessage';
+
         private fields: ValidateField[];
         constructor(...fields: ValidateField[]) {
+            this.fields = [];
+            this.addFields(...fields);
+        }
 
+
+        addFields(...fields: ValidateField[]) {
             for (let i = 0; i < fields.length; i++) {
 
                 let element = fields[i].element;
@@ -25,7 +32,7 @@ namespace dilu {
                 let errorElement: HTMLElement = fields[i].errorElement;
                 if (errorElement == null) {
                     errorElement = document.createElement("span");
-                    errorElement.className = errorClassName;
+                    errorElement.className = FormValidator.errorClassName;
                     errorElement.style.display = 'none';
                     if (element.nextSibling)
                         element.parentElement.insertBefore(errorElement, element.nextSibling);
@@ -40,7 +47,7 @@ namespace dilu {
                 fields[i].depends = fields[i].depends || [];
             }
 
-            this.fields = fields || [];
+            fields.forEach(o => this.fields.push(o));
         }
 
         clearErrors() {
