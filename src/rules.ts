@@ -32,7 +32,7 @@ namespace dilu {
         alpha: 'The %s field must only contain alphabetical characters.',
         alpha_numeric: 'The %s field must only contain alpha-numeric characters.',
         alpha_dash: 'The %s field must only contain alpha-numeric characters, underscores, and dashes.',
-        numeric: 'The %s field must contain only numbers.',
+        numeric: '请数入数字',
         integer: 'The %s field must contain an integer.',
         decimal: 'The %s field must contain a decimal number.',
         is_natural: 'The %s field must contain only positive numbers.',
@@ -58,13 +58,13 @@ namespace dilu {
         error?: RuleError,
     }
 
-    function createValidation(validate, error: RuleError): Rule {
+    function createValidation(validate: (value) => boolean | Promise<boolean>, error: RuleError): Rule {
         return {
             validate: validate,
             error: error
         }
     }
-    
+
     export let rules = {
         required(error?: RuleError) {
             let validate = (value) => value != '';
@@ -110,6 +110,13 @@ namespace dilu {
             var validate = (value) => mobileRegex.test(value);
             return createValidation(validate, error || msgs.mobile);
         },
+        numeric: function (error?: RuleError): Rule {
+            var validate = (value) => numericRegex.test(value);
+            return createValidation(validate, error || msgs.numeric);
+        },
+        custom: function (validate: (value) => boolean | Promise<boolean>, error: string) {
+            return createValidation(validate, error);
+        }
     };
 
     function elementValueCompare<T extends number | Date | string>(value: string, otherValue: T): 'lessThan' | 'greaterThan' | 'equal' {
