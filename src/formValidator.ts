@@ -8,7 +8,8 @@ namespace dilu {
         element: InputElement,
         rules: Rule[],
         errorElement?: HTMLElement,
-        depends?: ((() => Promise<boolean>) | (() => boolean))[]
+        depends?: ((() => Promise<boolean>) | (() => boolean))[],
+        condition?: () => boolean,
     };
 
     export class FormValidator {
@@ -33,7 +34,6 @@ namespace dilu {
                 if (errorElement == null) {
                     errorElement = document.createElement("span");
                     errorElement.className = FormValidator.errorClassName;
-                    errorElement.style.display = 'none';
                     if (element.nextSibling)
                         element.parentElement.insertBefore(errorElement, element.nextSibling);
                     else
@@ -42,7 +42,7 @@ namespace dilu {
                     fields[i].errorElement = errorElement;
                 }
 
-
+                errorElement.style.display = 'none';
 
                 fields[i].depends = fields[i].depends || [];
             }
@@ -65,6 +65,9 @@ namespace dilu {
             let ps = new Array<Promise<any>>();
             for (let i = 0; i < this.fields.length; i++) {
                 let field = this.fields[i];
+                if (field.condition && field.condition() == false)
+                    continue;
+
                 let p = this.checkField(field);
                 ps.push(p);
             }
