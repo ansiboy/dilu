@@ -13,7 +13,7 @@ namespace dilu {
     };
 
     export class FormValidator {
-        static errorClassName = 'validateMessage';
+        static errorClassName = 'validationMessage';
 
         private fields: ValidateField[];
         constructor(...fields: ValidateField[]) {
