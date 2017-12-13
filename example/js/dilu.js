@@ -94,7 +94,8 @@ var dilu;
                 let ps = new Array();
                 for (let j = 0; j < field.rules.length; j++) {
                     let rule = field.rules[j];
-                    let p = rule.validate(field.element.value);
+                    let value = FormValidator.elementValue(field.element);
+                    let p = rule.validate(value);
                     if (typeof p == 'boolean') {
                         p = Promise.resolve(p);
                     }
@@ -103,7 +104,8 @@ var dilu;
                     let errorElement;
                     if (typeof rule.error == 'string') {
                         errorElement = field.errorElement;
-                        errorElement.innerHTML = rule.error.replace('%s', field.element.name);
+                        let name = this.elementName(field.element);
+                        errorElement.innerHTML = rule.error.replace('%s', name);
                     }
                     else {
                         errorElement = rule.error;
@@ -129,8 +131,20 @@ var dilu;
                 throw dilu.errors.elementValidateRuleNotSet(inputElement);
             return this.checkField(field);
         }
+        static elementValue(element) {
+            if (element.tagName == "TEXTAREA") {
+                return element.innerHTML;
+            }
+            return element.value;
+        }
+        elementName(element) {
+            if (element.tagName == "TEXTAREA") {
+                return element.name;
+            }
+            return element.name;
+        }
     }
-    FormValidator.errorClassName = 'validateMessage';
+    FormValidator.errorClassName = 'validationMessage';
     dilu.FormValidator = FormValidator;
 })(dilu || (dilu = {}));
 var dilu;
@@ -179,7 +193,7 @@ var dilu;
             return createValidation(validate, error || msgs.required);
         },
         matches: function (otherElement, error) {
-            var validate = (value) => value == otherElement.value;
+            var validate = (value) => value == dilu.FormValidator.elementValue(otherElement); //otherElement.value;
             return createValidation(validate, error || msgs.required);
         },
         email: function (error) {

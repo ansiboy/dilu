@@ -1,6 +1,6 @@
 namespace dilu {
 
-    export type InputElement = HTMLElement & { name: string, value: string };
+    export type InputElement = HTMLElement & { name: string, value: string } | HTMLAreaElement;
 
     // export const errorClassName = 'validateMessage';
 
@@ -97,7 +97,8 @@ namespace dilu {
             let ps = new Array<Promise<any>>();
             for (let j = 0; j < field.rules.length; j++) {
                 let rule = field.rules[j];
-                let p = rule.validate(field.element.value);
+                let value = FormValidator.elementValue(field.element);
+                let p = rule.validate(value);
                 if (typeof p == 'boolean') {
                     p = Promise.resolve(p);
                 }
@@ -108,7 +109,8 @@ namespace dilu {
                 let errorElement: HTMLElement;
                 if (typeof rule.error == 'string') {
                     errorElement = field.errorElement;
-                    errorElement.innerHTML = rule.error.replace('%s', field.element.name);
+                    let name = this.elementName(field.element);
+                    errorElement.innerHTML = rule.error.replace('%s', name);
                 }
                 else {
                     errorElement = rule.error;
@@ -137,6 +139,22 @@ namespace dilu {
                 throw errors.elementValidateRuleNotSet(inputElement);
 
             return this.checkField(field);
+        }
+
+        static elementValue(element: InputElement): string {
+            if (element.tagName == "TEXTAREA") {
+                return (element as any).value;
+            }
+
+            return (element as HTMLInputElement).value;
+        }
+
+        private elementName(element: InputElement) {
+            if (element.tagName == "TEXTAREA") {
+                return (element as any).name;
+            }
+
+            return (element as HTMLInputElement).name
         }
     }
 }

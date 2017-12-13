@@ -71,7 +71,7 @@ namespace dilu {
             return createValidation(validate, error || msgs.required);
         },
         matches: function (otherElement: InputElement, error?: RuleError): Rule {
-            var validate = (value: string) => value == otherElement.value;
+            var validate = (value: string) => value == FormValidator.elementValue(otherElement); //otherElement.value;
             return createValidation(validate, error || msgs.required);
         },
         email: function (error?: RuleError): Rule {
