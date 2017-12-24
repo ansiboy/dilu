@@ -39,5 +39,5 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-shell');
     grunt.registerTask('build', ['shell']);
-    grunt.registerTask('default', ['build', 'copy'])//, 'connect'
+    grunt.registerTask('default', ['build', 'copy']);
 }

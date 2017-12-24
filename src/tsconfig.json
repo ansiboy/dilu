@@ -3,8 +3,14 @@
         "declaration": true,
         "module": "amd",
         "sourceMap": false,
-        "target": "es6",
-        "outFile": "../out/dilu.js"
+        "target": "es5",
+        "outFile": "../out/dilu.js",
+        "lib": [
+            "dom",
+            "scripthost",
+            "es2015",
+            "dom.iterable"
+        ]
     },
     "exclude": [
         "formValidator1.ts"
