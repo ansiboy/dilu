@@ -8,9 +8,13 @@ namespace dilu {
             let msg = `元素'${element.name}'没有设置验证规则`;
             return new Error(msg);
         },
-        fieldElementCanntNull(fieldIndex) {
-            let msg = `The element value in the field cannt be null, field index is ${fieldIndex}.`;
+        fieldElementCanntNull(fieldIndex?: number) {
+            // if (fieldIndex != null)
+            let msg = fieldIndex != null ?
+                `The element value in the field cannt be null, field index is ${fieldIndex}.` :
+                `The element in the field is null`;
             return new Error(msg);
         }
     }
 }
+
