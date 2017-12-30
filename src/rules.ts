@@ -50,15 +50,15 @@ namespace dilu {
     }
 
 
-    export type RuleError = string;
+    // export type RuleError = string;
     export type Validate = (value) => boolean | Promise<boolean>;
     export type RuleDepend = Rule | (() => boolean);
     export type Rule = {
         validate: (value) => boolean | Promise<boolean>,
-        error?: RuleError,
+        error?: string,
     }
 
-    function createValidation(validate: (value) => boolean | Promise<boolean>, error: RuleError): Rule {
+    function createValidation(validate: (value) => boolean | Promise<boolean>, error: string): Rule {
         return {
             validate: validate,
             error: error
@@ -66,51 +66,51 @@ namespace dilu {
     }
 
     export let rules = {
-        required(error?: RuleError) {
+        required(error?: string) {
             let validate = (value) => value != '';
             return createValidation(validate, error || msgs.required);
         },
-        matches: function (otherElement: InputElement, error?: RuleError): Rule {
+        matches: function (otherElement: InputElement, error?: string): Rule {
             var validate = (value: string) => value == otherElement.value;
             return createValidation(validate, error || msgs.required);
         },
-        email: function (error?: RuleError): Rule {
+        email: function (error?: string): Rule {
             var validate = (value) => emailRegex.test(value);
             return createValidation(validate, error || msgs.required);
         },
-        minLength: function (length: number, error?: RuleError): Rule {
+        minLength: function (length: number, error?: string): Rule {
             var validate = (value) => (value || '').length >= length;
             return createValidation(validate, error || msgs.minLength);
         },
-        maxLength: function (length: number, error?: RuleError) {
+        maxLength: function (length: number, error?: string) {
             var validate = (value) => (value || '').length <= length;
             return createValidation(validate, error || msgs.matches);
         },
-        greaterThan: function (value: number | Date, error: RuleError) {
-            var validate = (o) => elementValueCompare(o, value) == 'greaterThan';
+        greaterThan: function (value: () => number | Date, error: string) {
+            var validate = (o) => elementValueCompare(o, value()) == 'greaterThan';
             return createValidation(validate, error || msgs.greater_than);
         },
-        lessThan: function (value: number | Date | string, error: RuleError) {
-            var validate = (o) => elementValueCompare(o, value) == 'lessThan';
+        lessThan: function (value: () => number | Date | string, error: string) {
+            var validate = (o) => elementValueCompare(o, value()) == 'lessThan';
             return createValidation(validate, error || msgs.less_than);
         },
-        equal: function (value: number | Date | string, error?: RuleError) {
-            var validate = (o) => elementValueCompare(o, value) == 'greaterThan';
+        equal: function (value: () => number | Date | string, error?: string) {
+            var validate = (o) => elementValueCompare(o, value()) == 'equal';
             return createValidation(validate, error || msgs.equal);
         },
-        ip: function (error: RuleError): Rule {
+        ip: function (error: string): Rule {
             var validate = (value) => ipRegex.test(value);
             return createValidation(validate, error || msgs.ip);
         },
-        url: function (error?: RuleError): Rule {
+        url: function (error?: string): Rule {
             var validate = (value) => urlRegex.test(value);
             return createValidation(validate, error || msgs.valid_url);
         },
-        mobile: function (error?: RuleError): Rule {
+        mobile: function (error?: string): Rule {
             var validate = (value) => mobileRegex.test(value);
             return createValidation(validate, error || msgs.mobile);
         },
-        numeric: function (error?: RuleError): Rule {
+        numeric: function (error?: string): Rule {
             var validate = (value) => numericRegex.test(value);
             return createValidation(validate, error || msgs.numeric);
         },

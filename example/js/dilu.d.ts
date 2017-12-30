@@ -2,7 +2,7 @@ declare namespace dilu {
     let errors: {
         argumentNull(parameterName: any): Error;
         elementValidateRuleNotSet(element: HTMLInputElement): Error;
-        fieldElementCanntNull(fieldIndex: any): Error;
+        fieldElementCanntNull(fieldIndex?: number): Error;
     };
 }
 declare namespace dilu {
@@ -11,7 +11,7 @@ declare namespace dilu {
         value: string;
     };
     type ValidateField = {
-        element: InputElement;
+        element: InputElement | (() => InputElement);
         rules: Rule[];
         errorElement?: HTMLElement;
         depends?: ((() => Promise<boolean>) | (() => boolean))[];
@@ -30,12 +30,11 @@ declare namespace dilu {
     }
 }
 declare namespace dilu {
-    type RuleError = string;
     type Validate = (value) => boolean | Promise<boolean>;
     type RuleDepend = Rule | (() => boolean);
     type Rule = {
         validate: (value) => boolean | Promise<boolean>;
-        error?: RuleError;
+        error?: string;
     };
     let rules: {
         required(error?: string): Rule;
@@ -45,7 +44,7 @@ declare namespace dilu {
         maxLength: (length: number, error?: string) => Rule;
         greaterThan: (value: number | Date, error: string) => Rule;
         lessThan: (value: string | number | Date, error: string) => Rule;
-        equal: (value: string | number | Date, error?: string) => Rule;
+        equal: (value: () => string | number | Date, error?: string) => Rule;
         ip: (error: string) => Rule;
         url: (error?: string) => Rule;
         mobile: (error?: string) => Rule;

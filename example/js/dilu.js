@@ -18,7 +18,10 @@ var dilu;
             return new Error(msg);
         },
         fieldElementCanntNull(fieldIndex) {
-            let msg = `The element value in the field cannt be null, field index is ${fieldIndex}.`;
+            // if (fieldIndex != null)
+            let msg = fieldIndex != null ?
+                `The element value in the field cannt be null, field index is ${fieldIndex}.` :
+                `The element in the field is null`;
             return new Error(msg);
         }
     };
@@ -36,20 +39,39 @@ var dilu;
                 if (element == null) {
                     throw dilu.errors.fieldElementCanntNull(i);
                 }
-                let errorElement = fields[i].errorElement;
-                if (errorElement == null) {
-                    errorElement = document.createElement("span");
-                    errorElement.className = FormValidator.errorClassName;
-                    if (element.nextSibling)
-                        element.parentElement.insertBefore(errorElement, element.nextSibling);
-                    else
-                        element.parentElement.appendChild(errorElement);
-                    fields[i].errorElement = errorElement;
-                }
-                errorElement.style.display = 'none';
+                let f = Object.assign(fields[i], {
+                    getErrorElement: function () {
+                        let self = this;
+                        if (self.errorElement == null) {
+                            let element = typeof self.element == 'function' ? self.element() : self.element;
+                            if (element == null) {
+                                throw dilu.errors.fieldElementCanntNull(i);
+                            }
+                            let errorElement = self.errorElement = document.createElement("span");
+                            errorElement.className = FormValidator.errorClassName;
+                            errorElement.style.display = 'none';
+                            if (element.nextSibling)
+                                element.parentElement.insertBefore(errorElement, element.nextSibling);
+                            else
+                                element.parentElement.appendChild(errorElement);
+                        }
+                        return self.errorElement;
+                    }
+                });
+                // let errorElement: HTMLElement = fields[i].errorElement;
+                // if (errorElement == null) {
+                //     errorElement = document.createElement("span");
+                //     errorElement.className = FormValidator.errorClassName;
+                //     if (element.nextSibling)
+                //         element.parentElement.insertBefore(errorElement, element.nextSibling);
+                //     else
+                //         element.parentElement.appendChild(errorElement);
+                //     fields[i].errorElement = errorElement;
+                // }
                 fields[i].depends = fields[i].depends || [];
+                this.fields.push(f);
             }
-            fields.forEach(o => this.fields.push(o));
+            // fields.forEach(o => this.fields.push(o));
         }
         clearErrors() {
             this.fields.map(o => o.errorElement).forEach(o => o.style.display = 'none');
@@ -94,21 +116,20 @@ var dilu;
                 let ps = new Array();
                 for (let j = 0; j < field.rules.length; j++) {
                     let rule = field.rules[j];
-                    let p = rule.validate(field.element.value);
+                    let element = typeof field.element == 'function' ? field.element() : field.element;
+                    if (element == null)
+                        throw dilu.errors.fieldElementCanntNull();
+                    let p = rule.validate(element.value);
                     if (typeof p == 'boolean') {
                         p = Promise.resolve(p);
                     }
                     let isPass = yield p;
                     // result = isPass == false ? false : result;
-                    let errorElement;
-                    if (typeof rule.error == 'string') {
-                        errorElement = field.errorElement;
+                    let errorElement = field.getErrorElement();
+                    console.assert(errorElement != null, 'errorElement cannt be null.');
+                    if (rule.error != null) {
                         errorElement.innerHTML = rule.error.replace('%s', field.element.name);
                     }
-                    else {
-                        errorElement = rule.error;
-                    }
-                    console.assert(errorElement != null, 'errorElement cannt be null.');
                     if (isPass == false) {
                         errorElement.style.removeProperty('display');
                     }
@@ -130,7 +151,7 @@ var dilu;
             return this.checkField(field);
         }
     }
-    FormValidator.errorClassName = 'validateMessage';
+    FormValidator.errorClassName = 'validationMessage';
     dilu.FormValidator = FormValidator;
 })(dilu || (dilu = {}));
 var dilu;
@@ -203,7 +224,7 @@ var dilu;
             return createValidation(validate, error || msgs.less_than);
         },
         equal: function (value, error) {
-            var validate = (o) => elementValueCompare(o, value) == 'greaterThan';
+            var validate = (o) => elementValueCompare(o, value()) == 'equal';
             return createValidation(validate, error || msgs.equal);
         },
         ip: function (error) {
