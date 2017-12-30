@@ -116,19 +116,32 @@ var dilu;
                 let ps = new Array();
                 for (let j = 0; j < field.rules.length; j++) {
                     let rule = field.rules[j];
+<<<<<<< HEAD
                     let element = typeof field.element == 'function' ? field.element() : field.element;
                     if (element == null)
                         throw dilu.errors.fieldElementCanntNull();
                     let p = rule.validate(element.value);
+=======
+                    let value = FormValidator.elementValue(field.element);
+                    let p = rule.validate(value);
+>>>>>>> c4feb2cc4ff316a5c44e0c6d23a00db3a88ee432
                     if (typeof p == 'boolean') {
                         p = Promise.resolve(p);
                     }
                     let isPass = yield p;
                     // result = isPass == false ? false : result;
+<<<<<<< HEAD
                     let errorElement = field.getErrorElement();
                     console.assert(errorElement != null, 'errorElement cannt be null.');
                     if (rule.error != null) {
                         errorElement.innerHTML = rule.error.replace('%s', field.element.name);
+=======
+                    let errorElement;
+                    if (typeof rule.error == 'string') {
+                        errorElement = field.errorElement;
+                        let name = this.elementName(field.element);
+                        errorElement.innerHTML = rule.error.replace('%s', name);
+>>>>>>> c4feb2cc4ff316a5c44e0c6d23a00db3a88ee432
                     }
                     if (isPass == false) {
                         errorElement.style.removeProperty('display');
@@ -149,6 +162,18 @@ var dilu;
             if (!field)
                 throw dilu.errors.elementValidateRuleNotSet(inputElement);
             return this.checkField(field);
+        }
+        static elementValue(element) {
+            if (element.tagName == "TEXTAREA") {
+                return element.innerHTML;
+            }
+            return element.value;
+        }
+        elementName(element) {
+            if (element.tagName == "TEXTAREA") {
+                return element.name;
+            }
+            return element.name;
         }
     }
     FormValidator.errorClassName = 'validationMessage';
@@ -200,7 +225,7 @@ var dilu;
             return createValidation(validate, error || msgs.required);
         },
         matches: function (otherElement, error) {
-            var validate = (value) => value == otherElement.value;
+            var validate = (value) => value == dilu.FormValidator.elementValue(otherElement); //otherElement.value;
             return createValidation(validate, error || msgs.required);
         },
         email: function (error) {

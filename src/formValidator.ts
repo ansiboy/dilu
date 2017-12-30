@@ -1,6 +1,6 @@
 namespace dilu {
 
-    export type InputElement = HTMLElement & { name: string, value: string };
+    export type InputElement = HTMLElement & { name: string, value: string } | HTMLAreaElement;
 
     // export const errorClassName = 'validateMessage';
 
@@ -124,11 +124,14 @@ namespace dilu {
             let ps = new Array<Promise<any>>();
             for (let j = 0; j < field.rules.length; j++) {
                 let rule = field.rules[j];
+
                 let element = typeof field.element == 'function' ? field.element() : field.element;
                 if (element == null)
                     throw errors.fieldElementCanntNull();
 
-                let p = rule.validate(element.value);
+                let value = FormValidator.elementValue(element);
+                let p = rule.validate(value);
+
                 if (typeof p == 'boolean') {
                     p = Promise.resolve(p);
                 }
@@ -138,9 +141,10 @@ namespace dilu {
 
                 let errorElement = field.getErrorElement();
                 console.assert(errorElement != null, 'errorElement cannt be null.');
-
                 if (rule.error != null) {
-                    errorElement.innerHTML = rule.error.replace('%s', field.element.name);
+                    errorElement = field.errorElement;
+                    let name = this.elementName(element);
+                    errorElement.innerHTML = rule.error.replace('%s', name);
                 }
 
                 if (isPass == false) {
@@ -164,6 +168,22 @@ namespace dilu {
                 throw errors.elementValidateRuleNotSet(inputElement);
 
             return this.checkField(field);
+        }
+
+        static elementValue(element: InputElement): string {
+            if (element.tagName == "TEXTAREA") {
+                return (element as any).value;
+            }
+
+            return (element as HTMLInputElement).value;
+        }
+
+        private elementName(element: InputElement) {
+            if (element.tagName == "TEXTAREA") {
+                return (element as any).name;
+            }
+
+            return (element as HTMLInputElement).name
         }
     }
 }
