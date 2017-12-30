@@ -44,8 +44,8 @@ declare namespace dilu {
         email: (error?: string) => Rule;
         minLength: (length: number, error?: string) => Rule;
         maxLength: (length: number, error?: string) => Rule;
-        greaterThan: (value: number | Date, error: string) => Rule;
-        lessThan: (value: string | number | Date, error: string) => Rule;
+        greaterThan: (value: () => number | Date, error: string) => Rule;
+        lessThan: (value: () => string | number | Date, error: string) => Rule;
         equal: (value: () => string | number | Date, error?: string) => Rule;
         ip: (error: string) => Rule;
         url: (error?: string) => Rule;
