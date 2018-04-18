@@ -5,7 +5,8 @@ namespace dilu {
     // export const errorClassName = 'validateMessage';
 
     export type ValidateField = {
-        element: InputElement | (() => InputElement),
+        // element: InputElement | (() => InputElement),
+        name: string,
         rules: Rule[],
         errorElement?: HTMLElement,
         depends?: ((() => Promise<boolean>) | (() => boolean))[],
@@ -22,71 +23,111 @@ namespace dilu {
     type InnerValidateField = ValidateField & { getErrorElement: () => HTMLElement };
     export class FormValidator {
         static errorClassName = 'validationMessage';
-
-        private fields: InnerValidateField[];
-        constructor(...fields: ValidateField[]) {
-            this.fields = [];
-            this.addFields(...fields);
+        private form: HTMLElement;
+        private fields: ValidateField[];
+        constructor(form: HTMLElement, ...fields: ValidateField[]) {
+            this.fields = fields;
+            this.form = form;
+            // this.addFields(...fields);
         }
 
 
-        addFields(...fields: ValidateField[]) {
-            for (let i = 0; i < fields.length; i++) {
+        // addFields(...fields: ValidateField[]) {
+        //     for (let i = 0; i < fields.length; i++) {
 
-                let element = fields[i].element;
-                if (element == null) {
-                    throw errors.fieldElementCanntNull(i);
-                }
+        //         let element = fields[i].element;
+        //         if (element == null) {
+        //             throw errors.fieldElementCanntNull(i);
+        //         }
 
-                let f: InnerValidateField = Object.assign(fields[i], {
-                    getErrorElement: function () {
-                        let self = this as ValidateField;
-                        if (self.errorElement == null) {
-                            let element = typeof self.element == 'function' ? self.element() : self.element;
-                            if (element == null) {
-                                throw errors.fieldElementCanntNull(i);
-                            }
+        //         let f: InnerValidateField = Object.assign(fields[i], {
+        //             getErrorElement: function () {
+        //                 let self = this as ValidateField;
+        //                 if (self.errorElement == null) {
+        //                     let element = typeof self.element == 'function' ? self.element() : self.element;
+        //                     if (element == null) {
+        //                         throw errors.fieldElementCanntNull(i);
+        //                     }
 
-                            let errorElement = self.errorElement = document.createElement("span");
-                            errorElement.className = FormValidator.errorClassName;
-                            errorElement.style.display = 'none';
+        //                     let errorElement = self.errorElement = document.createElement("span");
+        //                     errorElement.className = FormValidator.errorClassName;
+        //                     errorElement.style.display = 'none';
 
-                            if (element.nextSibling)
-                                element.parentElement.insertBefore(errorElement, element.nextSibling);
-                            else
-                                element.parentElement.appendChild(errorElement);
-                        }
-                        return self.errorElement;
-                    }
-                })
-                // let errorElement: HTMLElement = fields[i].errorElement;
-                // if (errorElement == null) {
-                //     errorElement = document.createElement("span");
-                //     errorElement.className = FormValidator.errorClassName;
-                //     if (element.nextSibling)
-                //         element.parentElement.insertBefore(errorElement, element.nextSibling);
-                //     else
-                //         element.parentElement.appendChild(errorElement);
+        //                     if (element.nextSibling)
+        //                         element.parentElement.insertBefore(errorElement, element.nextSibling);
+        //                     else
+        //                         element.parentElement.appendChild(errorElement);
+        //                 }
+        //                 return self.errorElement;
+        //             }
+        //         })
+        //         // let errorElement: HTMLElement = fields[i].errorElement;
+        //         // if (errorElement == null) {
+        //         //     errorElement = document.createElement("span");
+        //         //     errorElement.className = FormValidator.errorClassName;
+        //         //     if (element.nextSibling)
+        //         //         element.parentElement.insertBefore(errorElement, element.nextSibling);
+        //         //     else
+        //         //         element.parentElement.appendChild(errorElement);
 
-                //     fields[i].errorElement = errorElement;
-                // }
-                fields[i].depends = fields[i].depends || [];
-                this.fields.push(f);
-            }
+        //         //     fields[i].errorElement = errorElement;
+        //         // }
+        //         fields[i].depends = fields[i].depends || [];
+        //         this.fields.push(f);
+        //     }
 
-            // fields.forEach(o => this.fields.push(o));
-        }
+        //     // fields.forEach(o => this.fields.push(o));
+        // }
 
         clearErrors() {
             this.fields.map(o => o.errorElement).forEach(o => o.style.display = 'none');
         }
 
-        clearElementError(element: HTMLInputElement) {
-            if (element == null) throw errors.argumentNull('element');
-            let field = this.fields.filter(o => o.element == element)[0];
-            if (field)
-                field.errorElement.style.display = 'none';
+        clearElementError(name: string) {
+            if (!name) throw errors.argumentNull('element');
+            let fields = this.fields.filter(o => o.name == name);
+            for (let field of fields) {
+                let errorElement = this.fieldErrorElement(field);
+                errorElement.style.display = 'none';
+            }
         }
+
+        private fieldElement(field: ValidateField): InputElement {
+            let name = field.name;
+            let element = this.form.querySelectorAll(`[name='${name}']`)[0] as InputElement;
+            if (element == null)
+                throw errors.elementNotExists(name);
+
+            return element;
+        }
+
+        private fieldErrorElement(field: ValidateField): HTMLElement {
+            if (field.errorElement) {
+                return field.errorElement;
+            }
+
+            let element = this.fieldElement(field);
+
+            // let element = typeof self.element == 'function' ? self.element() : self.element;
+            // if (element == null) {
+            //     throw errors.fieldElementCanntNull(i);
+            // }
+
+            let errorElement = field.errorElement = document.createElement("span");
+            errorElement.className = FormValidator.errorClassName;
+            errorElement.style.display = 'none';
+
+            if (element.nextSibling)
+                element.parentElement.insertBefore(errorElement, element.nextSibling);
+            else
+                element.parentElement.appendChild(errorElement);
+
+            return errorElement;
+        }
+
+        // private fieldDepends(field:ValidateField){
+        //     field.depends
+        // }
 
         async  check() {
             let ps = new Array<Promise<any>>();
@@ -104,11 +145,9 @@ namespace dilu {
             return result;
         };
 
-        private async checkField(field: InnerValidateField): Promise<boolean> {
+        private async checkField(field: ValidateField): Promise<boolean> {
 
-            let depends = field.depends;
-            console.assert(depends != null, 'depends is null');
-
+            let depends = field.depends || [];
             for (let j = 0; j < depends.length; j++) {
                 let dependResult = depends[j]();
                 if (typeof dependResult == 'boolean') {
@@ -125,7 +164,7 @@ namespace dilu {
             for (let j = 0; j < field.rules.length; j++) {
                 let rule = field.rules[j];
 
-                let element = typeof field.element == 'function' ? field.element() : field.element;
+                let element = this.fieldElement(field); //typeof field.element == 'function' ? field.element() : field.element;
                 if (element == null)
                     throw errors.fieldElementCanntNull();
 
@@ -139,7 +178,7 @@ namespace dilu {
                 let isPass = await p;
                 // result = isPass == false ? false : result;
 
-                let errorElement = field.getErrorElement();
+                let errorElement = this.fieldErrorElement(field); //field.getErrorElement();
                 console.assert(errorElement != null, 'errorElement cannt be null.');
                 if (rule.error != null) {
                     errorElement = field.errorElement;
@@ -161,11 +200,11 @@ namespace dilu {
             return true;
         }
 
-        checkElement(inputElement: HTMLInputElement): Promise<boolean> {
-            if (!inputElement) throw errors.argumentNull('inputElement');
-            let field = this.fields.filter(o => o.element == inputElement)[0];
+        checkElement(name: string): Promise<boolean> {
+            // if (!inputElement) throw errors.argumentNull('inputElement');
+            let field = this.fields.filter(o => o.name == name)[0];
             if (!field)
-                throw errors.elementValidateRuleNotSet(inputElement);
+                throw errors.elementNotExists(name); //errors.elementValidateRuleNotSet(inputElement);
 
             return this.checkField(field);
         }

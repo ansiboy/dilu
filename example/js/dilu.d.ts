@@ -3,6 +3,8 @@ declare namespace dilu {
         argumentNull(parameterName: any): Error;
         elementValidateRuleNotSet(element: HTMLInputElement): Error;
         fieldElementCanntNull(fieldIndex?: number): Error;
+        elementNotExists(name: string): Error;
+        fieldResultExpectBooleanType(name: string): Error;
     };
 }
 declare namespace dilu {
@@ -11,7 +13,7 @@ declare namespace dilu {
         value: string;
     } | HTMLAreaElement;
     type ValidateField = {
-        element: InputElement | (() => InputElement);
+        name: string;
         rules: Rule[];
         errorElement?: HTMLElement;
         depends?: ((() => Promise<boolean>) | (() => boolean))[];
@@ -19,14 +21,16 @@ declare namespace dilu {
     };
     class FormValidator {
         static errorClassName: string;
+        private form;
         private fields;
-        constructor(...fields: ValidateField[]);
-        addFields(...fields: ValidateField[]): void;
+        constructor(form: HTMLElement, ...fields: ValidateField[]);
         clearErrors(): void;
-        clearElementError(element: HTMLInputElement): void;
+        clearElementError(name: string): void;
+        private fieldElement(field);
+        private fieldErrorElement(field);
         check(): Promise<boolean>;
         private checkField(field);
-        checkElement(inputElement: HTMLInputElement): Promise<boolean>;
+        checkElement(name: string): Promise<boolean>;
         static elementValue(element: InputElement): string;
         private elementName(element);
     }

@@ -2,20 +2,22 @@
 let { FormValidator, rules } = dilu;
 let { required, mobile, equal } = rules;
 
-let mobileInput = document.getElementById('mobile') as HTMLInputElement;
-let verifyCodeInput = document.getElementById('verifyCode') as HTMLInputElement;
-let passwordInput = document.getElementById('password') as HTMLInputElement;
-let confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
-let validator: dilu.FormValidator = new dilu.FormValidator(
-    { element: mobileInput, rules: [required(), mobile()] },
+// let mobileInput = document.getElementById('mobile') as HTMLInputElement;
+// let verifyCodeInput = document.getElementById('verifyCode') as HTMLInputElement;
+let passwordInput = document.getElementsByName('password')[0] as HTMLInputElement;
+// let confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
+
+let form = document.getElementsByClassName('container')[0] as HTMLElement;
+let validator: dilu.FormValidator = new dilu.FormValidator(form,
+    { name: "mobile", rules: [required(), mobile()] },
     {
-        element: verifyCodeInput,
+        name: 'verifyCode',
         errorElement: document.getElementById('verifyCodeError'),
-        rules: [required()], depends: [() => validator.checkElement(mobileInput)]
+        rules: [required()], depends: [() => validator.checkElement('mobile')]
     },
-    { element: passwordInput, rules: [required('请输入密码')] },
+    { name: 'password', rules: [required('请输入密码')] },
     {
-        element: confirmPasswordInput,
+        name: 'confirmPassword',
         rules: [
             required('请再次输入密码'),
             equal(() => passwordInput.value, '两次输入的密码不一致')
@@ -28,7 +30,7 @@ document.getElementById('btn-register').onclick = function () {
 };
 
 document.getElementById('btn-verifyCode').onclick = function () {
-    validator.checkElement(verifyCodeInput);
+    validator.checkElement('mobile');
 }
 
 

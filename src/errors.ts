@@ -14,6 +14,14 @@ namespace dilu {
                 `The element value in the field cannt be null, field index is ${fieldIndex}.` :
                 `The element in the field is null`;
             return new Error(msg);
+        },
+        elementNotExists(name: string) {
+            let msg = `Element ${name} is not exits in the form.`;
+            return new Error(msg);
+        },
+        fieldResultExpectBooleanType(name: string) {
+            let msg = `Result of ${name} field is expected boolean.`;
+            return new Error(msg);
         }
     }
 }
