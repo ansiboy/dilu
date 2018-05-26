@@ -28,59 +28,12 @@ namespace dilu {
         constructor(form: HTMLElement, ...fields: ValidateField[]) {
             this.fields = fields;
             this.form = form;
-            // this.addFields(...fields);
         }
 
-
-        // addFields(...fields: ValidateField[]) {
-        //     for (let i = 0; i < fields.length; i++) {
-
-        //         let element = fields[i].element;
-        //         if (element == null) {
-        //             throw errors.fieldElementCanntNull(i);
-        //         }
-
-        //         let f: InnerValidateField = Object.assign(fields[i], {
-        //             getErrorElement: function () {
-        //                 let self = this as ValidateField;
-        //                 if (self.errorElement == null) {
-        //                     let element = typeof self.element == 'function' ? self.element() : self.element;
-        //                     if (element == null) {
-        //                         throw errors.fieldElementCanntNull(i);
-        //                     }
-
-        //                     let errorElement = self.errorElement = document.createElement("span");
-        //                     errorElement.className = FormValidator.errorClassName;
-        //                     errorElement.style.display = 'none';
-
-        //                     if (element.nextSibling)
-        //                         element.parentElement.insertBefore(errorElement, element.nextSibling);
-        //                     else
-        //                         element.parentElement.appendChild(errorElement);
-        //                 }
-        //                 return self.errorElement;
-        //             }
-        //         })
-        //         // let errorElement: HTMLElement = fields[i].errorElement;
-        //         // if (errorElement == null) {
-        //         //     errorElement = document.createElement("span");
-        //         //     errorElement.className = FormValidator.errorClassName;
-        //         //     if (element.nextSibling)
-        //         //         element.parentElement.insertBefore(errorElement, element.nextSibling);
-        //         //     else
-        //         //         element.parentElement.appendChild(errorElement);
-
-        //         //     fields[i].errorElement = errorElement;
-        //         // }
-        //         fields[i].depends = fields[i].depends || [];
-        //         this.fields.push(f);
-        //     }
-
-        //     // fields.forEach(o => this.fields.push(o));
-        // }
-
         clearErrors() {
-            this.fields.map(o => o.errorElement).forEach(o => o.style.display = 'none');
+            this.fields.map(o => o.errorElement)
+                .filter(o => o != null)
+                .forEach(o => o.style.display = 'none');
         }
 
         clearElementError(name: string) {
@@ -125,16 +78,17 @@ namespace dilu {
             return errorElement;
         }
 
-        // private fieldDepends(field:ValidateField){
-        //     field.depends
-        // }
-
-        async  check() {
+        async check() {
             let ps = new Array<Promise<any>>();
             for (let i = 0; i < this.fields.length; i++) {
                 let field = this.fields[i];
                 if (field.condition && field.condition() == false)
                     continue;
+
+                let element = this.fieldElement(field);
+                element.addEventListener('change', () => {
+                    this.checkField(field);
+                });
 
                 let p = this.checkField(field);
                 ps.push(p);
