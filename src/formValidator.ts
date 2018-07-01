@@ -2,10 +2,7 @@ namespace dilu {
 
     export type InputElement = HTMLElement & { name: string, value: string } | HTMLAreaElement;
 
-    // export const errorClassName = 'validateMessage';
-
     export type ValidateField = {
-        // element: InputElement | (() => InputElement),
         name: string,
         rules: Rule[],
         errorElement?: HTMLElement,
@@ -13,14 +10,6 @@ namespace dilu {
         condition?: () => boolean,
     };
 
-    // type InnerValidateField = {
-    //     element: () => InputElement,
-    //     rules: Rule[],
-    //     errorElement?: HTMLElement,
-    //     depends?: ((() => Promise<boolean>) | (() => boolean))[],
-    //     condition?: () => boolean,
-    // }
-    type InnerValidateField = ValidateField & { getErrorElement: () => HTMLElement };
     export class FormValidator {
         static errorClassName = 'validationMessage';
         private form: HTMLElement;
@@ -60,12 +49,6 @@ namespace dilu {
             }
 
             let element = this.fieldElement(field);
-
-            // let element = typeof self.element == 'function' ? self.element() : self.element;
-            // if (element == null) {
-            //     throw errors.fieldElementCanntNull(i);
-            // }
-
             let errorElement = field.errorElement = document.createElement("span");
             errorElement.className = FormValidator.errorClassName;
             errorElement.style.display = 'none';
@@ -113,12 +96,11 @@ namespace dilu {
                     return false;
             }
 
-            // let result = true;
             let ps = new Array<Promise<any>>();
             for (let j = 0; j < field.rules.length; j++) {
                 let rule = field.rules[j];
 
-                let element = this.fieldElement(field); //typeof field.element == 'function' ? field.element() : field.element;
+                let element = this.fieldElement(field);
                 if (element == null)
                     throw errors.fieldElementCanntNull();
 
@@ -130,9 +112,7 @@ namespace dilu {
                 }
 
                 let isPass = await p;
-                // result = isPass == false ? false : result;
-
-                let errorElement = this.fieldErrorElement(field); //field.getErrorElement();
+                let errorElement = this.fieldErrorElement(field); 
                 console.assert(errorElement != null, 'errorElement cannt be null.');
                 if (rule.error != null) {
                     errorElement = field.errorElement;
@@ -155,10 +135,9 @@ namespace dilu {
         }
 
         checkElement(name: string): Promise<boolean> {
-            // if (!inputElement) throw errors.argumentNull('inputElement');
             let field = this.fields.filter(o => o.name == name)[0];
             if (!field)
-                throw errors.elementNotExists(name); //errors.elementValidateRuleNotSet(inputElement);
+                throw errors.elementNotExists(name);
 
             return this.checkField(field);
         }
