@@ -61,7 +61,33 @@ namespace dilu {
             return errorElement;
         }
 
-        async check() {
+        /**
+         * 验证字段
+         */
+        check(): boolean {
+            let ps = new Array<boolean>();
+            for (let i = 0; i < this.fields.length; i++) {
+                let field = this.fields[i];
+                if (field.condition && field.condition() == false)
+                    continue;
+
+                let element = this.fieldElement(field);
+                element.addEventListener('keyup', () => {
+                    this.checkField(field);
+                });
+
+                let p = this.checkField(field);
+                ps.push(p);
+            }
+
+            let result = ps.filter(o => o == false).length == 0;
+            return result;
+        };
+
+        /**
+         * 异步验证字段
+         */
+        async checkAsync(): Promise<boolean> {
             let ps = new Array<Promise<any>>();
             for (let i = 0; i < this.fields.length; i++) {
                 let field = this.fields[i];
@@ -69,11 +95,11 @@ namespace dilu {
                     continue;
 
                 let element = this.fieldElement(field);
-                element.addEventListener('change', () => {
-                    this.checkField(field);
+                element.addEventListener('keyup', () => {
+                    this.checkFieldAsync(field);
                 });
 
-                let p = this.checkField(field);
+                let p = this.checkFieldAsync(field);
                 ps.push(p);
             }
 
@@ -82,7 +108,42 @@ namespace dilu {
             return result;
         };
 
-        private async checkField(field: ValidateField): Promise<boolean> {
+        private checkField(field: ValidateField): boolean {
+            let depends = field.depends || [];
+            for (let j = 0; j < depends.length; j++) {
+                let dependResult = depends[j]();
+                if (typeof dependResult == 'object') {
+                    throw new Error('Please use checkAsync method.');
+                }
+
+                let dependIsOK = dependResult;
+                if (!dependIsOK)
+                    return false;
+            }
+
+            for (let j = 0; j < field.rules.length; j++) {
+                let rule = field.rules[j];
+
+                let element = this.fieldElement(field);
+                if (element == null)
+                    throw errors.fieldElementCanntNull();
+
+                let value = FormValidator.elementValue(element);
+                let isPass = rule.validate(value);
+
+                if (typeof isPass == 'object') {
+                    throw new Error('Please use checkAsync method.');
+                }
+
+                this.showElement(!isPass, field, rule, element);
+                if (!isPass)
+                    return false;
+            }
+
+            return true;
+        }
+
+        private async checkFieldAsync(field: ValidateField): Promise<boolean> {
 
             let depends = field.depends || [];
             for (let j = 0; j < depends.length; j++) {
@@ -112,20 +173,7 @@ namespace dilu {
                 }
 
                 let isPass = await p;
-                let errorElement = this.fieldErrorElement(field); 
-                console.assert(errorElement != null, 'errorElement cannt be null.');
-                if (rule.error != null) {
-                    errorElement = field.errorElement;
-                    let name = this.elementName(element);
-                    errorElement.innerHTML = rule.error.replace('%s', name);
-                }
-
-                if (isPass == false) {
-                    errorElement.style.removeProperty('display');
-                }
-                else {
-                    errorElement.style.display = 'none';
-                }
+                this.showElement(!isPass, field, rule, element);
 
                 if (!isPass)
                     return false;
@@ -134,7 +182,41 @@ namespace dilu {
             return true;
         }
 
-        checkElement(name: string): Promise<boolean> {
+        private showElement(display: boolean, field: ValidateField, rule: Rule, element: InputElement) {
+            let errorElement = this.fieldErrorElement(field);
+            console.assert(errorElement != null, 'errorElement cannt be null.');
+            if (rule.error != null) {
+                errorElement = field.errorElement;
+                let name = this.elementName(element);
+                errorElement.innerHTML = rule.error.replace('%s', name);
+            }
+
+            if (display) {
+                errorElement.style.removeProperty('display');
+            }
+            else {
+                errorElement.style.display = 'none';
+            }
+        }
+
+
+        /**
+         * 异步验证 HTML 元素
+         * @param name HTML 元素名称
+         */
+        checkElementAsync(name: string): Promise<boolean> {
+            let field = this.fields.filter(o => o.name == name)[0];
+            if (!field)
+                throw errors.elementNotExists(name);
+
+            return this.checkFieldAsync(field);
+        }
+
+        /**
+         * 异步验证 HTML 元素
+         * @param name HTML 元素名称
+         */
+        checkElement(name: string): boolean {
             let field = this.fields.filter(o => o.name == name)[0];
             if (!field)
                 throw errors.elementNotExists(name);
