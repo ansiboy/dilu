@@ -65,6 +65,9 @@ namespace dilu {
         }
     }
 
+    /**
+     * 表单验证规则
+     */
     export let rules = {
         /**
          * 验证必填字段
@@ -79,7 +82,7 @@ namespace dilu {
          * @param otherElement 另外一个字段
          * @param error 错误提示文字
          */
-        matches: function (otherElement: InputElement, error?: string): Rule {
+        matches(otherElement: InputElement, error?: string): Rule {
             var validate = (value: string) => value == FormValidator.elementValue(otherElement);
             return createValidation(validate, error || msgs.required);
         },
@@ -87,7 +90,7 @@ namespace dilu {
          * 验证邮箱
          * @param error 错误提示文字
          */
-        email: function (error?: string): Rule {
+        email(error?: string): Rule {
             var validate = (value) => emailRegex.test(value);
             return createValidation(validate, error || msgs.required);
         },
@@ -96,7 +99,7 @@ namespace dilu {
          * @param length 最小长度
          * @param error 错误提示文字
          */
-        minLength: function (length: number, error?: string): Rule {
+        minLength(length: number, error?: string): Rule {
             var validate = (value) => (value || '').length >= length;
             return createValidation(validate, error || msgs.minLength);
         },
@@ -105,7 +108,7 @@ namespace dilu {
          * @param length 最大长度
          * @param error 错误提示文字
          */
-        maxLength: function (length: number, error?: string) {
+        maxLength(length: number, error?: string) {
             var validate = (value) => (value || '').length <= length;
             return createValidation(validate, error || msgs.matches);
         },
@@ -114,7 +117,7 @@ namespace dilu {
          * @param value 指定的值
          * @param error 错误提示文字
          */
-        greaterThan: function (value: () => number | Date, error: string) {
+        greaterThan(value: () => number | Date, error: string) {
             var validate = (o) => elementValueCompare(o, value()) == 'greaterThan';
             return createValidation(validate, error || msgs.greater_than);
         },
@@ -123,7 +126,7 @@ namespace dilu {
          * @param value 指定的值
          * @param error 错误提示文字
          */
-        lessThan: function (value: () => number | Date | string, error: string) {
+        lessThan(value: () => number | Date | string, error: string) {
             var validate = (o) => elementValueCompare(o, value()) == 'lessThan';
             return createValidation(validate, error || msgs.less_than);
         },
@@ -132,7 +135,7 @@ namespace dilu {
          * @param value 指定的值
          * @param error 错误提示文字
          */
-        equal: function (value: () => number | Date | string, error?: string) {
+        equal(value: () => number | Date | string, error?: string) {
             var validate = (o) => elementValueCompare(o, value()) == 'equal';
             return createValidation(validate, error || msgs.equal);
         },
@@ -140,7 +143,7 @@ namespace dilu {
          * 验证字段为 IP
          * @param error 错误提示文字
          */
-        ip: function (error: string): Rule {
+        ip(error: string): Rule {
             var validate = (value) => ipRegex.test(value);
             return createValidation(validate, error || msgs.ip);
         },
@@ -148,7 +151,7 @@ namespace dilu {
          * 验证字段为 URL
          * @param error 错误提示文字
          */
-        url: function (error?: string): Rule {
+        url(error?: string): Rule {
             var validate = (value) => urlRegex.test(value);
             return createValidation(validate, error || msgs.valid_url);
         },
@@ -156,7 +159,7 @@ namespace dilu {
          * 验证字段为手机号码
          * @param error 错误提示文字
          */
-        mobile: function (error?: string): Rule {
+        mobile(error?: string): Rule {
             var validate = (value) => mobileRegex.test(value);
             return createValidation(validate, error || msgs.mobile);
         },
@@ -164,7 +167,7 @@ namespace dilu {
          * 验证字段为数字
          * @param error 错误提示文字
          */
-        numeric: function (error?: string): Rule {
+        numeric(error?: string): Rule {
             var validate = (value) => numericRegex.test(value);
             return createValidation(validate, error || msgs.numeric);
         },
@@ -173,7 +176,7 @@ namespace dilu {
          * @param validate 自定义验证的方法
          * @param error 错误提示文字
          */
-        custom: function (validate: (value) => boolean | Promise<boolean>, error: string) {
+        custom(validate: (value) => boolean | Promise<boolean>, error: string) {
             return createValidation(validate, error);
         }
     };

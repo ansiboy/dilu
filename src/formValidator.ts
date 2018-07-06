@@ -10,6 +10,9 @@ namespace dilu {
         condition?: () => boolean,
     };
 
+    /**
+     * 表单验证器，用于对表单中的字段进行验证
+     */
     export class FormValidator {
         static errorClassName = 'validationMessage';
         private form: HTMLElement;
@@ -19,12 +22,19 @@ namespace dilu {
             this.form = form;
         }
 
+        /**
+         * 清除表单的错误信息
+         */
         clearErrors() {
             this.fields.map(o => o.errorElement)
                 .filter(o => o != null)
                 .forEach(o => o.style.display = 'none');
         }
 
+        /**
+         * 清除表单的指定元素错误信息
+         * @param name 指定的元素名称
+         */
         clearElementError(name: string) {
             if (!name) throw errors.argumentNull('element');
             let fields = this.fields.filter(o => o.name == name);
@@ -213,7 +223,7 @@ namespace dilu {
         }
 
         /**
-         * 异步验证 HTML 元素
+         * 同步验证 HTML 元素
          * @param name HTML 元素名称
          */
         checkElement(name: string): boolean {
