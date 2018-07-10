@@ -17,9 +17,11 @@ namespace dilu {
         static errorClassName = 'validationMessage';
         private form: HTMLElement;
         private fields: ValidateField[];
+        private elementEvents: { [key: string]: any };
         constructor(form: HTMLElement, ...fields: ValidateField[]) {
             this.fields = fields;
             this.form = form;
+            this.elementEvents = {};
         }
 
         /**
@@ -81,18 +83,13 @@ namespace dilu {
                 if (field.condition && field.condition() == false)
                     continue;
 
-                let element = this.fieldElement(field);
-                element.addEventListener('keyup', () => {
-                    this.checkField(field);
-                });
-
                 let p = this.checkField(field);
                 ps.push(p);
             }
 
             let result = ps.filter(o => o == false).length == 0;
             return result;
-        };
+        }
 
         /**
          * 异步验证字段
@@ -104,11 +101,6 @@ namespace dilu {
                 if (field.condition && field.condition() == false)
                     continue;
 
-                let element = this.fieldElement(field);
-                element.addEventListener('keyup', () => {
-                    this.checkFieldAsync(field);
-                });
-
                 let p = this.checkFieldAsync(field);
                 ps.push(p);
             }
@@ -116,9 +108,36 @@ namespace dilu {
             let checkResults = await Promise.all(ps);
             let result = checkResults.filter(o => o == false).length == 0;
             return result;
-        };
+        }
+
+        private bindElementEvent(field: ValidateField, isAsync: boolean) {
+            if (this.elementEvents[field.name]) {
+                return;
+            }
+
+            let element = this.fieldElement(field);
+            let validateFunc = (() => {
+                let checked = false;
+                return () => {
+                    if (checked)
+                        return;
+
+                    checked = true;
+                    isAsync ? this.checkFieldAsync(field) : this.checkField(field);
+                }
+            })()
+
+            element.addEventListener('change', validateFunc);
+            if (element.tagName != 'select') {
+                element.addEventListener('keyup', validateFunc);
+            }
+
+            this.elementEvents[field.name] = true;
+        }
 
         private checkField(field: ValidateField): boolean {
+            this.bindElementEvent(field, false);
+
             let depends = field.depends || [];
             for (let j = 0; j < depends.length; j++) {
                 let dependResult = depends[j]();
@@ -154,7 +173,7 @@ namespace dilu {
         }
 
         private async checkFieldAsync(field: ValidateField): Promise<boolean> {
-
+            this.bindElementEvent(field, true);
             let depends = field.depends || [];
             for (let j = 0; j < depends.length; j++) {
                 let dependResult = depends[j]();
@@ -167,7 +186,6 @@ namespace dilu {
                     return false;
             }
 
-            let ps = new Array<Promise<any>>();
             for (let j = 0; j < field.rules.length; j++) {
                 let rule = field.rules[j];
 
@@ -198,7 +216,7 @@ namespace dilu {
             if (rule.error != null) {
                 errorElement = field.errorElement;
                 let name = this.elementName(element);
-                errorElement.innerHTML = rule.error.replace('%s', name);
+                errorElement.innerHTML = errorText(rule.error).replace('%s', name);
             }
 
             if (display) {

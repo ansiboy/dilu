@@ -46,16 +46,26 @@ namespace dilu {
         less_than_date: 'The %s field must contain an older date than %s.',
         greater_than_or_equal_date: 'The %s field must contain a date that\'s at least as recent as %s.',
         less_than_or_equal_date: 'The %s field must contain a date that\'s %s or older.',
-        mobile: '请输入正确的手机号码'
+        mobile: '请输入正确的手机号码',
+        custom: '请输入正确制',
     }
 
+
+    export function errorText(err: ErrorInfo): string {
+        if (!err) return null;
+        if (typeof err == 'string')
+            return err;
+
+        return err();
+    }
 
     // export type RuleError = string;
     export type Validate = (value) => boolean | Promise<boolean>;
     export type RuleDepend = Rule | (() => boolean);
+    export type ErrorInfo = string | (() => string);
     export type Rule = {
         validate: (value) => boolean | Promise<boolean>,
-        error?: string,
+        error?: ErrorInfo,
     }
 
     function createValidation(validate: (value) => boolean | Promise<boolean>, error: string): Rule {
@@ -73,111 +83,111 @@ namespace dilu {
          * 验证必填字段
          * @param error 错误提示文字
          */
-        required(error?: string) {
+        required(error?: ErrorInfo) {
             let validate = (value) => value != '';
-            return createValidation(validate, error || msgs.required);
+            return createValidation(validate, errorText(error) || msgs.required);
         },
         /**
          * 验证两个字段值是否相等
          * @param otherElement 另外一个字段
          * @param error 错误提示文字
          */
-        matches(otherElement: InputElement, error?: string): Rule {
+        matches(otherElement: InputElement, error?: ErrorInfo): Rule {
             var validate = (value: string) => value == FormValidator.elementValue(otherElement);
-            return createValidation(validate, error || msgs.required);
+            return createValidation(validate, errorText(error) || msgs.required);
         },
         /**
          * 验证邮箱
          * @param error 错误提示文字
          */
-        email(error?: string): Rule {
+        email(error?: ErrorInfo): Rule {
             var validate = (value) => emailRegex.test(value);
-            return createValidation(validate, error || msgs.required);
+            return createValidation(validate, errorText(error) || msgs.required);
         },
         /**
          * 验证字段最小长度
          * @param length 最小长度
          * @param error 错误提示文字
          */
-        minLength(length: number, error?: string): Rule {
+        minLength(length: number, error?: ErrorInfo): Rule {
             var validate = (value) => (value || '').length >= length;
-            return createValidation(validate, error || msgs.minLength);
+            return createValidation(validate, errorText(error) || msgs.minLength);
         },
         /**
          * 验证字段的最大长度
          * @param length 最大长度
          * @param error 错误提示文字
          */
-        maxLength(length: number, error?: string) {
+        maxLength(length: number, error?: ErrorInfo) {
             var validate = (value) => (value || '').length <= length;
-            return createValidation(validate, error || msgs.matches);
+            return createValidation(validate, errorText(error) || msgs.matches);
         },
         /**
          * 验证字段大于或等于指定的值
          * @param value 指定的值
          * @param error 错误提示文字
          */
-        greaterThan(value: () => number | Date, error: string) {
+        greaterThan(value: () => number | Date, error?: ErrorInfo) {
             var validate = (o) => elementValueCompare(o, value()) == 'greaterThan';
-            return createValidation(validate, error || msgs.greater_than);
+            return createValidation(validate, errorText(error) || msgs.greater_than);
         },
         /**
          * 验证字段小于或等于指定的值
          * @param value 指定的值
          * @param error 错误提示文字
          */
-        lessThan(value: () => number | Date | string, error: string) {
+        lessThan(value: () => number | Date | string, error?: ErrorInfo) {
             var validate = (o) => elementValueCompare(o, value()) == 'lessThan';
-            return createValidation(validate, error || msgs.less_than);
+            return createValidation(validate, errorText(error) || msgs.less_than);
         },
         /**
          * 验证字段等于指定的值
          * @param value 指定的值
          * @param error 错误提示文字
          */
-        equal(value: () => number | Date | string, error?: string) {
+        equal(value: () => number | Date | string, error?: ErrorInfo) {
             var validate = (o) => elementValueCompare(o, value()) == 'equal';
-            return createValidation(validate, error || msgs.equal);
+            return createValidation(validate, errorText(error) || msgs.equal);
         },
         /**
          * 验证字段为 IP
          * @param error 错误提示文字
          */
-        ip(error: string): Rule {
+        ip(error?: ErrorInfo): Rule {
             var validate = (value) => ipRegex.test(value);
-            return createValidation(validate, error || msgs.ip);
+            return createValidation(validate, errorText(error) || msgs.ip);
         },
         /**
          * 验证字段为 URL
          * @param error 错误提示文字
          */
-        url(error?: string): Rule {
+        url(error?: ErrorInfo): Rule {
             var validate = (value) => urlRegex.test(value);
-            return createValidation(validate, error || msgs.valid_url);
+            return createValidation(validate, errorText(error) || msgs.valid_url);
         },
         /**
          * 验证字段为手机号码
          * @param error 错误提示文字
          */
-        mobile(error?: string): Rule {
+        mobile(error?: ErrorInfo): Rule {
             var validate = (value) => mobileRegex.test(value);
-            return createValidation(validate, error || msgs.mobile);
+            return createValidation(validate, errorText(error) || msgs.mobile);
         },
         /**
          * 验证字段为数字
          * @param error 错误提示文字
          */
-        numeric(error?: string): Rule {
+        numeric(error?: ErrorInfo): Rule {
             var validate = (value) => numericRegex.test(value);
-            return createValidation(validate, error || msgs.numeric);
+            return createValidation(validate, errorText(error) || msgs.numeric);
         },
         /**
          * 自定义验证
          * @param validate 自定义验证的方法
          * @param error 错误提示文字
          */
-        custom(validate: (value) => boolean | Promise<boolean>, error: string) {
-            return createValidation(validate, error);
+        custom(validate: (value) => boolean | Promise<boolean>, error?: ErrorInfo) {
+            return createValidation(validate, errorText(error) || msgs.custom);
         }
     };
 
