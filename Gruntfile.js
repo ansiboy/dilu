@@ -46,10 +46,10 @@ module.exports = function (grunt) {
         }
     });
 
-
+    grunt.loadNpmTasks('grunt-babel');
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-shell');
     grunt.registerTask('build', ['shell']);
-    grunt.registerTask('default', ['build', 'copy']);
+    grunt.registerTask('default', ['build', 'copy', 'babel']);
 }
