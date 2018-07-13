@@ -216,7 +216,8 @@ namespace dilu {
             if (rule.error != null) {
                 errorElement = field.errorElement;
                 let name = this.elementName(element);
-                errorElement.innerHTML = errorText(rule.error).replace('%s', name);
+                let errorText = typeof rule.error == 'string' ? rule.error : rule.error() || '';
+                errorElement.innerHTML = errorText.replace('%s', name);
             }
 
             if (display) {

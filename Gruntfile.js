@@ -15,6 +15,18 @@ module.exports = function (grunt) {
                 }
             }
         },
+        babel: {
+            source: {
+                options: {
+                    sourceMap: false,
+                    presets: ["es2015"],
+                },
+                files: [{
+                    src: [`out/dilu.js`],
+                    dest: `out/dilu.es5.js`
+                }]
+            }
+        },
         copy: {
             out: {
                 files: [{

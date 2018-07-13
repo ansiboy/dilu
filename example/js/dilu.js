@@ -36,16 +36,27 @@ var dilu;
 })(dilu || (dilu = {}));
 var dilu;
 (function (dilu) {
+    /**
+     * 表单验证器，用于对表单中的字段进行验证
+     */
     class FormValidator {
         constructor(form, ...fields) {
             this.fields = fields;
             this.form = form;
+            this.elementEvents = {};
         }
+        /**
+         * 清除表单的错误信息
+         */
         clearErrors() {
             this.fields.map(o => o.errorElement)
                 .filter(o => o != null)
                 .forEach(o => o.style.display = 'none');
         }
+        /**
+         * 清除表单的指定元素错误信息
+         * @param name 指定的元素名称
+         */
         clearElementError(name) {
             if (!name)
                 throw dilu.errors.argumentNull('element');
@@ -85,17 +96,12 @@ var dilu;
                 let field = this.fields[i];
                 if (field.condition && field.condition() == false)
                     continue;
-                let element = this.fieldElement(field);
-                element.addEventListener('keyup', () => {
-                    this.checkField(field);
-                });
                 let p = this.checkField(field);
                 ps.push(p);
             }
             let result = ps.filter(o => o == false).length == 0;
             return result;
         }
-        ;
         /**
          * 异步验证字段
          */
@@ -106,10 +112,6 @@ var dilu;
                     let field = this.fields[i];
                     if (field.condition && field.condition() == false)
                         continue;
-                    let element = this.fieldElement(field);
-                    element.addEventListener('keyup', () => {
-                        this.checkFieldAsync(field);
-                    });
                     let p = this.checkFieldAsync(field);
                     ps.push(p);
                 }
@@ -118,8 +120,28 @@ var dilu;
                 return result;
             });
         }
-        ;
+        bindElementEvent(field, isAsync) {
+            if (this.elementEvents[field.name]) {
+                return;
+            }
+            let element = this.fieldElement(field);
+            let validateFunc = (() => {
+                let checked = false;
+                return () => {
+                    if (checked)
+                        return;
+                    checked = true;
+                    isAsync ? this.checkFieldAsync(field) : this.checkField(field);
+                };
+            })();
+            element.addEventListener('change', validateFunc);
+            if (element.tagName != 'select') {
+                element.addEventListener('keyup', validateFunc);
+            }
+            this.elementEvents[field.name] = true;
+        }
         checkField(field) {
+            this.bindElementEvent(field, false);
             let depends = field.depends || [];
             for (let j = 0; j < depends.length; j++) {
                 let dependResult = depends[j]();
@@ -148,6 +170,7 @@ var dilu;
         }
         checkFieldAsync(field) {
             return __awaiter(this, void 0, void 0, function* () {
+                this.bindElementEvent(field, true);
                 let depends = field.depends || [];
                 for (let j = 0; j < depends.length; j++) {
                     let dependResult = depends[j]();
@@ -158,7 +181,6 @@ var dilu;
                     if (!dependIsOK)
                         return false;
                 }
-                let ps = new Array();
                 for (let j = 0; j < field.rules.length; j++) {
                     let rule = field.rules[j];
                     let element = this.fieldElement(field);
@@ -183,7 +205,8 @@ var dilu;
             if (rule.error != null) {
                 errorElement = field.errorElement;
                 let name = this.elementName(element);
-                errorElement.innerHTML = rule.error.replace('%s', name);
+                let errorText = typeof rule.error == 'string' ? rule.error : rule.error() || '';
+                errorElement.innerHTML = errorText.replace('%s', name);
             }
             if (display) {
                 errorElement.style.removeProperty('display');
@@ -203,7 +226,7 @@ var dilu;
             return this.checkFieldAsync(field);
         }
         /**
-         * 异步验证 HTML 元素
+         * 同步验证 HTML 元素
          * @param name HTML 元素名称
          */
         checkElement(name) {
@@ -260,7 +283,8 @@ var dilu;
         less_than_date: 'The %s field must contain an older date than %s.',
         greater_than_or_equal_date: 'The %s field must contain a date that\'s at least as recent as %s.',
         less_than_or_equal_date: 'The %s field must contain a date that\'s %s or older.',
-        mobile: '请输入正确的手机号码'
+        mobile: '请输入正确的手机号码',
+        custom: '请输入正确制',
     };
     function createValidation(validate, error) {
         return {
@@ -268,6 +292,14 @@ var dilu;
             error: error
         };
     }
+    function calc(value) {
+        if (typeof value == 'function')
+            return value();
+        return value;
+    }
+    /**
+     * 表单验证规则
+     */
     dilu.rules = {
         /**
          * 验证必填字段
@@ -282,7 +314,7 @@ var dilu;
          * @param otherElement 另外一个字段
          * @param error 错误提示文字
          */
-        matches: function (otherElement, error) {
+        matches(otherElement, error) {
             var validate = (value) => value == dilu.FormValidator.elementValue(otherElement);
             return createValidation(validate, error || msgs.required);
         },
@@ -290,7 +322,7 @@ var dilu;
          * 验证邮箱
          * @param error 错误提示文字
          */
-        email: function (error) {
+        email(error) {
             var validate = (value) => emailRegex.test(value);
             return createValidation(validate, error || msgs.required);
         },
@@ -299,8 +331,8 @@ var dilu;
          * @param length 最小长度
          * @param error 错误提示文字
          */
-        minLength: function (length, error) {
-            var validate = (value) => (value || '').length >= length;
+        minLength(length, error) {
+            var validate = (value) => (value || '').length >= calc(length);
             return createValidation(validate, error || msgs.minLength);
         },
         /**
@@ -308,26 +340,26 @@ var dilu;
          * @param length 最大长度
          * @param error 错误提示文字
          */
-        maxLength: function (length, error) {
-            var validate = (value) => (value || '').length <= length;
+        maxLength(length, error) {
+            var validate = (value) => (value || '').length <= calc(length);
             return createValidation(validate, error || msgs.matches);
         },
         /**
-         * 验证字段大于或等于指定的值
+         * 验证字段大于指定的值
          * @param value 指定的值
          * @param error 错误提示文字
          */
-        greaterThan: function (value, error) {
-            var validate = (o) => elementValueCompare(o, value()) == 'greaterThan';
+        greaterThan(value, error) {
+            var validate = (o) => elementValueCompare(o, calc(value)) == 'greaterThan';
             return createValidation(validate, error || msgs.greater_than);
         },
         /**
-         * 验证字段小于或等于指定的值
+         * 验证字段小于指定的值
          * @param value 指定的值
          * @param error 错误提示文字
          */
-        lessThan: function (value, error) {
-            var validate = (o) => elementValueCompare(o, value()) == 'lessThan';
+        lessThan(value, error) {
+            var validate = (o) => elementValueCompare(o, calc(value)) == 'lessThan';
             return createValidation(validate, error || msgs.less_than);
         },
         /**
@@ -335,15 +367,15 @@ var dilu;
          * @param value 指定的值
          * @param error 错误提示文字
          */
-        equal: function (value, error) {
-            var validate = (o) => elementValueCompare(o, value()) == 'equal';
+        equal(value, error) {
+            var validate = (o) => elementValueCompare(o, calc(value)) == 'equal';
             return createValidation(validate, error || msgs.equal);
         },
         /**
          * 验证字段为 IP
          * @param error 错误提示文字
          */
-        ip: function (error) {
+        ip(error) {
             var validate = (value) => ipRegex.test(value);
             return createValidation(validate, error || msgs.ip);
         },
@@ -351,7 +383,7 @@ var dilu;
          * 验证字段为 URL
          * @param error 错误提示文字
          */
-        url: function (error) {
+        url(error) {
             var validate = (value) => urlRegex.test(value);
             return createValidation(validate, error || msgs.valid_url);
         },
@@ -359,7 +391,7 @@ var dilu;
          * 验证字段为手机号码
          * @param error 错误提示文字
          */
-        mobile: function (error) {
+        mobile(error) {
             var validate = (value) => mobileRegex.test(value);
             return createValidation(validate, error || msgs.mobile);
         },
@@ -367,7 +399,7 @@ var dilu;
          * 验证字段为数字
          * @param error 错误提示文字
          */
-        numeric: function (error) {
+        numeric(error) {
             var validate = (value) => numericRegex.test(value);
             return createValidation(validate, error || msgs.numeric);
         },
@@ -376,8 +408,8 @@ var dilu;
          * @param validate 自定义验证的方法
          * @param error 错误提示文字
          */
-        custom: function (validate, error) {
-            return createValidation(validate, error);
+        custom(validate, error) {
+            return createValidation(validate, error || msgs.custom);
         }
     };
     function elementValueCompare(value, otherValue) {
