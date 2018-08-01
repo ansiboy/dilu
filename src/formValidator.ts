@@ -117,13 +117,22 @@ namespace dilu {
 
             let element = this.fieldElement(field);
             let validateFunc = (() => {
-                let checked = false;
+                let checking = false;
                 return () => {
-                    if (checked)
+                    if (checking)
                         return;
 
-                    checked = true;
-                    isAsync ? this.checkFieldAsync(field) : this.checkField(field);
+                    checking = true;
+                    // isAsync ? this.checkFieldAsync(field) : this.checkField(field);
+                    if (isAsync) {
+                        this.checkFieldAsync(field)
+                            .then(() => checking = false)
+                            .catch(() => checking = false)
+                    }
+                    else {
+                        this.checkField(field);
+                        checking = false;
+                    }
                 }
             })()
 
