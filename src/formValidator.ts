@@ -19,9 +19,13 @@ namespace dilu {
         private fields: ValidateField[];
         private elementEvents: { [key: string]: any };
         constructor(form: HTMLElement, ...fields: ValidateField[]) {
-            this.fields = fields;
+            this.fields = fields || [];
             this.form = form;
             this.elementEvents = {};
+        }
+
+        appendField(field: ValidateField) {
+            this.fields.push(field)
         }
 
         /**
@@ -38,11 +42,27 @@ namespace dilu {
          * @param name 指定的元素名称
          */
         clearElementError(name: string) {
-            if (!name) throw errors.argumentNull('element');
+            if (!name) throw errors.argumentNull('name');
             let fields = this.fields.filter(o => o.name == name);
             for (let field of fields) {
                 let errorElement = this.fieldErrorElement(field);
                 errorElement.style.display = 'none';
+            }
+        }
+
+        /**
+         * 设置表单的指定元素错误信息
+         * @param name 指定的元素名称
+         * @param error 错误信息
+         */
+        setElementError(name: string, error: string) {
+            if (!name) throw errors.argumentNull('name');
+            if (!error) throw errors.argumentNull('error');
+            let fields = this.fields.filter(o => o.name == name);
+            for (let field of fields) {
+                let errorElement = this.fieldErrorElement(field);
+                errorElement.style.removeProperty('display')
+                errorElement.innerHTML = error
             }
         }
 

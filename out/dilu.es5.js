@@ -69,16 +69,21 @@ var dilu;
                 fields[_key - 1] = arguments[_key];
             }
 
-            this.fields = fields;
+            this.fields = fields || [];
             this.form = form;
             this.elementEvents = {};
         }
-        /**
-         * 清除表单的错误信息
-         */
-
 
         _createClass(FormValidator, [{
+            key: 'appendField',
+            value: function appendField(field) {
+                this.fields.push(field);
+            }
+            /**
+             * 清除表单的错误信息
+             */
+
+        }, {
             key: 'clearErrors',
             value: function clearErrors() {
                 this.fields.map(function (o) {
@@ -97,7 +102,7 @@ var dilu;
         }, {
             key: 'clearElementError',
             value: function clearElementError(name) {
-                if (!name) throw dilu.errors.argumentNull('element');
+                if (!name) throw dilu.errors.argumentNull('name');
                 var fields = this.fields.filter(function (o) {
                     return o.name == name;
                 });
@@ -123,6 +128,47 @@ var dilu;
                     } finally {
                         if (_didIteratorError) {
                             throw _iteratorError;
+                        }
+                    }
+                }
+            }
+            /**
+             * 设置表单的指定元素错误信息
+             * @param name 指定的元素名称
+             * @param error 错误信息
+             */
+
+        }, {
+            key: 'setElementError',
+            value: function setElementError(name, error) {
+                if (!name) throw dilu.errors.argumentNull('name');
+                if (!error) throw dilu.errors.argumentNull('error');
+                var fields = this.fields.filter(function (o) {
+                    return o.name == name;
+                });
+                var _iteratorNormalCompletion2 = true;
+                var _didIteratorError2 = false;
+                var _iteratorError2 = undefined;
+
+                try {
+                    for (var _iterator2 = fields[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                        var field = _step2.value;
+
+                        var errorElement = this.fieldErrorElement(field);
+                        errorElement.style.removeProperty('display');
+                        errorElement.innerHTML = error;
+                    }
+                } catch (err) {
+                    _didIteratorError2 = true;
+                    _iteratorError2 = err;
+                } finally {
+                    try {
+                        if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                            _iterator2.return();
+                        }
+                    } finally {
+                        if (_didIteratorError2) {
+                            throw _iteratorError2;
                         }
                     }
                 }
@@ -237,11 +283,21 @@ var dilu;
                 }
                 var element = this.fieldElement(field);
                 var validateFunc = function () {
-                    var checked = false;
+                    var checking = false;
                     return function () {
-                        if (checked) return;
-                        checked = true;
-                        isAsync ? _this.checkFieldAsync(field) : _this.checkField(field);
+                        if (checking) return;
+                        checking = true;
+                        // isAsync ? this.checkFieldAsync(field) : this.checkField(field);
+                        if (isAsync) {
+                            _this.checkFieldAsync(field).then(function () {
+                                return checking = false;
+                            }).catch(function () {
+                                return checking = false;
+                            });
+                        } else {
+                            _this.checkField(field);
+                            checking = false;
+                        }
                     };
                 }();
                 element.addEventListener('change', validateFunc);

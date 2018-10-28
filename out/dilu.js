@@ -41,9 +41,12 @@ var dilu;
      */
     class FormValidator {
         constructor(form, ...fields) {
-            this.fields = fields;
+            this.fields = fields || [];
             this.form = form;
             this.elementEvents = {};
+        }
+        appendField(field) {
+            this.fields.push(field);
         }
         /**
          * 清除表单的错误信息
@@ -59,11 +62,28 @@ var dilu;
          */
         clearElementError(name) {
             if (!name)
-                throw dilu.errors.argumentNull('element');
+                throw dilu.errors.argumentNull('name');
             let fields = this.fields.filter(o => o.name == name);
             for (let field of fields) {
                 let errorElement = this.fieldErrorElement(field);
                 errorElement.style.display = 'none';
+            }
+        }
+        /**
+         * 设置表单的指定元素错误信息
+         * @param name 指定的元素名称
+         * @param error 错误信息
+         */
+        setElementError(name, error) {
+            if (!name)
+                throw dilu.errors.argumentNull('name');
+            if (!error)
+                throw dilu.errors.argumentNull('error');
+            let fields = this.fields.filter(o => o.name == name);
+            for (let field of fields) {
+                let errorElement = this.fieldErrorElement(field);
+                errorElement.style.removeProperty('display');
+                errorElement.innerHTML = error;
             }
         }
         fieldElement(field) {
@@ -126,12 +146,21 @@ var dilu;
             }
             let element = this.fieldElement(field);
             let validateFunc = (() => {
-                let checked = false;
+                let checking = false;
                 return () => {
-                    if (checked)
+                    if (checking)
                         return;
-                    checked = true;
-                    isAsync ? this.checkFieldAsync(field) : this.checkField(field);
+                    checking = true;
+                    // isAsync ? this.checkFieldAsync(field) : this.checkField(field);
+                    if (isAsync) {
+                        this.checkFieldAsync(field)
+                            .then(() => checking = false)
+                            .catch(() => checking = false);
+                    }
+                    else {
+                        this.checkField(field);
+                        checking = false;
+                    }
                 };
             })();
             element.addEventListener('change', validateFunc);

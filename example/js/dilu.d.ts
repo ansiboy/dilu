@@ -28,6 +28,7 @@ declare namespace dilu {
         private fields;
         private elementEvents;
         constructor(form: HTMLElement, ...fields: ValidateField[]);
+        appendField(field: ValidateField): void;
         /**
          * 清除表单的错误信息
          */
@@ -37,6 +38,12 @@ declare namespace dilu {
          * @param name 指定的元素名称
          */
         clearElementError(name: string): void;
+        /**
+         * 设置表单的指定元素错误信息
+         * @param name 指定的元素名称
+         * @param error 错误信息
+         */
+        setElementError(name: string, error: string): void;
         private fieldElement;
         private fieldErrorElement;
         /**
