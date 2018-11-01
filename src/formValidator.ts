@@ -18,6 +18,10 @@ namespace dilu {
         private form: HTMLElement;
         private fields: ValidateField[];
         private elementEvents: { [key: string]: any };
+
+        /** 输入框的值发生改变，是否重新校验该输入框的值，默认为 true */
+        validateOnChanged = true
+
         constructor(form: HTMLElement, ...fields: ValidateField[]) {
             this.fields = fields || [];
             this.form = form;
@@ -156,9 +160,12 @@ namespace dilu {
                 }
             })()
 
-            element.addEventListener('change', validateFunc);
-            if (element.tagName != 'select') {
-                element.addEventListener('keyup', validateFunc);
+            if (this.validateOnChanged) {
+                element.addEventListener('change', validateFunc);
+                if (element.tagName != 'select') {
+                    element.addEventListener('keyup', validateFunc);
+                }
+
             }
 
             this.elementEvents[field.name] = true;
