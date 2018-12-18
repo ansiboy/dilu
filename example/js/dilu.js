@@ -41,6 +41,7 @@ var dilu;
      */
     class FormValidator {
         constructor(form, ...fields) {
+            this.validateOnChanged = true;
             this.fields = fields || [];
             this.form = form;
             this.elementEvents = {};
@@ -163,9 +164,11 @@ var dilu;
                     }
                 };
             })();
-            element.addEventListener('change', validateFunc);
-            if (element.tagName != 'select') {
-                element.addEventListener('keyup', validateFunc);
+            if (this.validateOnChanged) {
+                element.addEventListener('change', validateFunc);
+                if (element.tagName != 'select') {
+                    element.addEventListener('keyup', validateFunc);
+                }
             }
             this.elementEvents[field.name] = true;
         }

@@ -27,6 +27,7 @@ declare namespace dilu {
         private form;
         private fields;
         private elementEvents;
+        validateOnChanged: boolean;
         constructor(form: HTMLElement, ...fields: ValidateField[]);
         appendField(field: ValidateField): void;
         /**
