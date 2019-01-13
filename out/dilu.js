@@ -1,26 +1,4 @@
-
-    
-/*!
- * DILU v1.0.0
- * https://github.com/ansiboy/dilu
- *
- * Copyright (c) 2016-2018, shu mai <ansiboy@163.com>
- * Licensed under the MIT License.
- *
- */
-    (function(factory) { 
-        if (typeof require === 'function' && typeof exports === 'object' && typeof module === 'object') { 
-            // [1] CommonJS/Node.js 
-            var target = module['exports'] || exports;
-            var dilu = factory(target, require);
-            Object.assign(target, dilu);
-        } else if (typeof define === 'function' && define['amd']) {
-            define(factory); 
-        } else { 
-            factory();
-        } 
-    })(function() {
-    var dilu;
+var dilu;
 (function (dilu) {
     dilu.errors = {
         argumentNull(parameterName) {
@@ -505,8 +483,3 @@ var dilu;
     }
     ;
 })(dilu || (dilu = {}));
-
-window['dilu'] = window['dilu'] || dilu 
-                                
- return dilu;
-                });

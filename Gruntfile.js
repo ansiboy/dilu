@@ -1,4 +1,42 @@
 module.exports = function (grunt) {
+
+    require('load-grunt-tasks')(grunt);
+
+    let pkg = grunt.file.readJSON('package.json');
+
+    let license = `
+/*!
+ * DILU v${pkg.version}
+ * https://github.com/ansiboy/dilu
+ *
+ * Copyright (c) 2016-2018, shu mai <ansiboy@163.com>
+ * Licensed under the MIT License.
+ *
+ */`;
+
+    var build_dir = 'out';
+    var release_dir = 'dist';
+    let lib_name = 'dilu'
+    let lib_js_banner = `
+    ${license}
+    (function(factory) { 
+        if (typeof require === 'function' && typeof exports === 'object' && typeof module === 'object') { 
+            // [1] CommonJS/Node.js 
+            var target = module['exports'] || exports;
+            var ${lib_name} = factory(target, require);
+            Object.assign(target, ${lib_name});
+        } else if (typeof define === 'function' && define['amd']) {
+            define(factory); 
+        } else { 
+            factory();
+        } 
+    })(function() {
+    `;
+    let lib_js_footer =
+        `\n\window[\'${lib_name}\'] = window[\'${lib_name}\'] || ${lib_name} \n\
+                                \n return ${lib_name};\n\
+                });`
+
     grunt.initConfig({
         connect: {
             examples: {
@@ -22,34 +60,63 @@ module.exports = function (grunt) {
                     presets: ["es2015"],
                 },
                 files: [{
-                    src: [`out/dilu.js`],
-                    dest: `out/dilu.es5.js`
+                    src: [`${build_dir}/${lib_name}.js`],
+                    dest: `${release_dir}/${lib_name}.es5.js`
                 }]
             }
+        },
+        concat: {
+            lib_es6: {
+                options: {
+                    banner: lib_js_banner,
+                    footer: lib_js_footer,
+                },
+                src: [`${build_dir}/${lib_name}.js`],
+                dest: `${release_dir}/${lib_name}.js`
+            },
+            declare: {
+                options: {
+                    banner: `
+/// <reference path="../out/${lib_name}.d.ts"/>
+
+declare module "maishu-${lib_name}" { 
+    export = ${lib_name}; 
+}
+                 
+`,
+                },
+                src: [],
+                dest: `${release_dir}/${lib_name}.d.ts`
+            },
         },
         copy: {
             out: {
                 files: [{
-                    src: 'out/dilu.js',
-                    dest: 'example/js/dilu.js'
+                    src: `${release_dir}/${lib_name}.js`,
+                    dest: `example/js/${lib_name}.js`
                 }, {
-                    src: 'out/dilu.d.ts',
-                    dest: 'example/js/dilu.d.ts'
+                    src: `${release_dir}/${lib_name}.d.ts`,
+                    dest: `example/js/${lib_name}.d.ts`
                 }]
-
             }
         },
         shell: {
             src: {
                 command: `tsc -p src`
             }
-        }
+        },
+        uglify: {
+            out: {
+                options: {
+                    mangle: false
+                },
+                files: [{
+                    src: `${release_dir}/${lib_name}.es5.js`,
+                    dest: `${release_dir}/${lib_name}.min.js`
+                }]
+            }
+        },
     });
 
-    grunt.loadNpmTasks('grunt-babel');
-    grunt.loadNpmTasks('grunt-contrib-connect');
-    grunt.loadNpmTasks('grunt-contrib-copy');
-    grunt.loadNpmTasks('grunt-shell');
-    grunt.registerTask('build', ['shell']);
-    grunt.registerTask('default', ['build', 'copy', 'babel']);
+    grunt.registerTask('default', ['shell', 'concat', 'babel', 'uglify', 'copy']);
 }
