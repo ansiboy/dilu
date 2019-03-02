@@ -1,10 +1,10 @@
 {
     "compilerOptions": {
         "declaration": true,
-        "module": "none",
+        "module": "commonjs",
         "sourceMap": false,
         "target": "es6",
-        "outFile": "../out/dilu.js",
+        "outDir": "../out",
         "lib": [
             "dom",
             "scripthost",
