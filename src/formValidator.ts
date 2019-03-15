@@ -26,6 +26,8 @@ export class FormValidator {
     validateOnChanged = true
 
     constructor(form: HTMLElement, ...fields: ValidateField[]) {
+        if (!form) throw errors.argumentNull('form')
+        
         this.fields = fields || [];
         this.form = form;
         this.elementEvents = {};

@@ -16,6 +16,8 @@ class FormValidator {
     constructor(form, ...fields) {
         /** 输入框的值发生改变，是否重新校验该输入框的值，默认为 true */
         this.validateOnChanged = true;
+        if (!form)
+            throw errors_1.errors.argumentNull('form');
         this.fields = fields || [];
         this.form = form;
         this.elementEvents = {};
