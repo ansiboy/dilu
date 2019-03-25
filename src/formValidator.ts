@@ -27,7 +27,7 @@ export class FormValidator {
 
     constructor(form: HTMLElement, ...fields: ValidateField[]) {
         if (!form) throw errors.argumentNull('form')
-        
+
         this.fields = fields || [];
         this.form = form;
         this.elementEvents = {};
@@ -85,21 +85,25 @@ export class FormValidator {
     }
 
     private fieldErrorElement(field: ValidateField): HTMLElement {
-        if (field.errorElement) {
-            return field.errorElement;
+        if (!field.errorElement) {
+            let errorElement = this.form.getElementsByClassName(`${FormValidator.errorClassName} ${field.name}`)[0] as HTMLElement
+            if (!errorElement) {
+                let element = this.fieldElement(field);
+                errorElement = document.createElement("span");
+                errorElement.className = FormValidator.errorClassName;
+                errorElement.style.display = 'none';
+
+                if (element.nextSibling)
+                    element.parentElement.insertBefore(errorElement, element.nextSibling);
+                else
+                    element.parentElement.appendChild(errorElement);
+            }
+
+            field.errorElement = errorElement
         }
 
-        let element = this.fieldElement(field);
-        let errorElement = field.errorElement = document.createElement("span");
-        errorElement.className = FormValidator.errorClassName;
-        errorElement.style.display = 'none';
-
-        if (element.nextSibling)
-            element.parentElement.insertBefore(errorElement, element.nextSibling);
-        else
-            element.parentElement.appendChild(errorElement);
-
-        return errorElement;
+        return field.errorElement;
+        // return errorElement;
     }
 
     /**
