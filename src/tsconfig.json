@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "declaration": true,
-        "module": "amd",
+        "module": "commonjs",
         "sourceMap": false,
         "target": "es6",
         "outDir": "../out",
