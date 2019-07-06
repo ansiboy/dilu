@@ -173,8 +173,20 @@ export class FormValidator {
 
         if (this.validateOnChanged) {
             element.addEventListener('change', validateFunc);
-            if (element.tagName != 'select') {
+            let elementType = (element as HTMLInputElement).type || "text";
+            if (elementType == "text" || elementType == "password") {
                 element.addEventListener('keyup', validateFunc);
+            }
+            else if (elementType == "radio") {
+                let name = (element as HTMLInputElement).name;
+                let elements = this.form.querySelectorAll(`[name='${name}']`);
+                for (let i = 0; i < elements.length; i++) {
+                    if (elements[i] == element) {
+                        continue;
+                    }
+
+                    elements[i].addEventListener("change", validateFunc);
+                }
             }
 
         }
@@ -204,7 +216,7 @@ export class FormValidator {
             if (element == null)
                 throw errors.fieldElementCanntNull();
 
-            let value = FormValidator.elementValue(element);
+            let value = this.elementValue(element);
             let isPass = rule.validate(value);
 
             if (typeof isPass == 'object') {
@@ -241,7 +253,7 @@ export class FormValidator {
             if (element == null)
                 throw errors.fieldElementCanntNull();
 
-            let value = FormValidator.elementValue(element);
+            let value = this.elementValue(element);
             let p = rule.validate(value);
 
             if (typeof p == 'boolean') {
@@ -301,9 +313,21 @@ export class FormValidator {
         return this.checkField(field);
     }
 
-    static elementValue(element: InputElement): string {
+    private elementValue(element: InputElement): string {
         if (element.tagName == "TEXTAREA") {
             return (element as any).value;
+        }
+
+        let inputElement = element as HTMLInputElement;
+        if (inputElement.type == "radio") {
+            let elements = this.form.querySelectorAll(`[name='${inputElement.name}']`)
+            for (let i = 0; i < elements.length; i++) {
+                if ((elements[i] as HTMLInputElement).checked) {
+                    return (elements[i] as HTMLInputElement).value;
+                }
+            }
+
+            return "";
         }
 
         return (element as HTMLInputElement).value;

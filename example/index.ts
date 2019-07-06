@@ -1,3 +1,4 @@
+import * as dilu from "../out/index"
 
 let FormValidator = dilu.FormValidator;
 let r = dilu.rules;

@@ -306,9 +306,21 @@ function () {
 
       if (this.validateOnChanged) {
         element.addEventListener('change', validateFunc);
+        var elementType = element.type || "text";
 
-        if (element.tagName != 'select') {
+        if (elementType == "text" || elementType == "password") {
           element.addEventListener('keyup', validateFunc);
+        } else if (elementType == "radio") {
+          var name = element.name;
+          var elements = this.form.querySelectorAll("[name='".concat(name, "']"));
+
+          for (var i = 0; i < elements.length; i++) {
+            if (elements[i] == element) {
+              continue;
+            }
+
+            elements[i].addEventListener("change", validateFunc);
+          }
         }
       }
 
@@ -338,7 +350,7 @@ function () {
         var _element = this.fieldElement(field);
 
         if (_element == null) throw errors_1.errors.fieldElementCanntNull();
-        var value = FormValidator.elementValue(_element);
+        var value = this.elementValue(_element);
         var isPass = rule.validate(value);
 
         if (_typeof(isPass) == 'object') {
@@ -418,7 +430,7 @@ function () {
                 throw errors_1.errors.fieldElementCanntNull();
 
               case 21:
-                value = FormValidator.elementValue(_element2);
+                value = this.elementValue(_element2);
                 p = rule.validate(value);
 
                 if (typeof p == 'boolean') {
@@ -503,6 +515,29 @@ function () {
       return this.checkField(field);
     }
   }, {
+    key: "elementValue",
+    value: function elementValue(element) {
+      if (element.tagName == "TEXTAREA") {
+        return element.value;
+      }
+
+      var inputElement = element;
+
+      if (inputElement.type == "radio") {
+        var elements = this.form.querySelectorAll("[name='".concat(inputElement.name, "']"));
+
+        for (var i = 0; i < elements.length; i++) {
+          if (elements[i].checked) {
+            return elements[i].value;
+          }
+        }
+
+        return "";
+      }
+
+      return element.value;
+    }
+  }, {
     key: "elementName",
     value: function elementName(element) {
       if (element.tagName == "TEXTAREA") {
@@ -510,15 +545,6 @@ function () {
       }
 
       return element.name;
-    }
-  }], [{
-    key: "elementValue",
-    value: function elementValue(element) {
-      if (element.tagName == "TEXTAREA") {
-        return element.value;
-      }
-
-      return element.value;
     }
   }]);
 
