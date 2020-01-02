@@ -61,6 +61,6 @@ export declare class FormValidator {
      * @param name HTML 元素名称
      */
     checkElement(name: string): boolean;
-    static elementValue(element: InputElement): string;
+    private elementValue;
     private elementName;
 }
