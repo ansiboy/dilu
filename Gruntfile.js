@@ -1,8 +1,22 @@
+function modifyVersion() {
+    const package = require("./package.json");
+
+    let version = package.version || "1.0.0";
+    let arr = version.split(".");
+    arr[arr.length - 1] = (Number.parseInt(arr[arr.length - 1]) + 1).toString();
+    version = arr.join(".");
+    package.version = version;
+
+    const fs = require('fs');
+    let data = JSON.stringify(package, null, 4);
+    fs.writeFileSync("package.json", data, "utf8");
+};
+modifyVersion();
 
 const webpack_es6 = require('./webpack.config.js');
 
 let webpack_es6_min = Object.assign({}, webpack_es6, {
-    output: { filename: "index.min.js" },
+    output: Object.assign({}, webpack_es6.output, { filename: "index.min.js" }),
     optimization: {
         minimize: true
     }
@@ -11,14 +25,14 @@ let webpack_es6_min = Object.assign({}, webpack_es6, {
 
 let webpack_es5 = Object.assign({}, webpack_es6, {
     entry: __dirname + "/out-es5/index.js",
-    output: { filename: "index.es5.js" }
+    output: Object.assign({}, webpack_es6.output, { filename: "index.es5.js" }),
 })
 
 let webpack_es5_min = Object.assign({}, webpack_es6, {
     entry: __dirname + "/out-es5/index.js",
-    output: { filename: "index.es5.min.js" },
+    output: Object.assign({}, webpack_es6.output, { filename: "index.es5.min.js" }),
     optimization: {
-        minimize: true, 
+        minimize: true,
     }
 })
 
@@ -68,3 +82,4 @@ module.exports = function (grunt) {
 
     grunt.registerTask('default', ['shell', 'babel', 'webpack']);
 };
+

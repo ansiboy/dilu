@@ -1,13 +1,23 @@
 /*!
  * 
- *  maishu-dilu v1.6.2
+ *  maishu-dilu v1.6.10
  *  https://github.com/ansiboy/dilu
  *  
  *  Copyright (c) 2016-2018, shu mai <ansiboy@163.com>
  *  Licensed under the MIT License.
  * 
  */
-define(function() { return /******/ (function(modules) { // webpackBootstrap
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["dilu"] = factory();
+	else
+		root["dilu"] = factory();
+})(window, function() {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -671,5 +681,6 @@ function getValidDate(date) {
 
 /***/ })
 
-/******/ })});;
+/******/ });
+});
 //# sourceMappingURL=index.js.map
