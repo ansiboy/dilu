@@ -2,7 +2,7 @@ import { Rule } from "./rules";
 export declare type InputElement = HTMLElement & {
     name: string;
     value: string;
-} | HTMLAreaElement;
+};
 export declare type ValidateField = {
     name: string;
     rules: Rule[];

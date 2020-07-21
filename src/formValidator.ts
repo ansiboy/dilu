@@ -3,7 +3,7 @@ import { errors } from "./errors";
 
 // namespace dilu {
 
-export type InputElement = HTMLElement & { name: string, value: string } | HTMLAreaElement;
+export type InputElement = HTMLElement & { name: string, value: string };
 
 export type ValidateField = {
     name: string,

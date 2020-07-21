@@ -2,10 +2,7 @@
 
 Object.defineProperty(exports, "__esModule", {
   value: true
-});
-
-var formValidator_1 = require("./formValidator"); // namespace dilu {
-
+}); // namespace dilu {
 
 var ruleRegex = /^(.+?)\[(.+)\]$/,
     numericRegex = /^[0-9]+$/,
@@ -95,7 +92,7 @@ exports.rules = {
    */
   matches: function matches(otherElement, error) {
     var validate = function validate(value) {
-      return value == formValidator_1.FormValidator.elementValue(otherElement);
+      return value == otherElement.value;
     };
 
     return createValidation(validate, error || msgs.required);

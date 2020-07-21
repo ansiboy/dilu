@@ -93,7 +93,7 @@ export let rules = {
      * @param error 错误提示文字
      */
     matches(otherElement: InputElement, error?: ErrorInfo): Rule {
-        var validate = (value: string) => value == FormValidator.elementValue(otherElement);
+        var validate = (value: string) => value == otherElement.value;
         return createValidation(validate, error || msgs.required);
     },
     /**

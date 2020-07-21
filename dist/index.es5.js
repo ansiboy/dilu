@@ -1,6 +1,6 @@
 /*!
  * 
- *  maishu-dilu v1.6.10
+ *  maishu-dilu v1.7.1
  *  https://github.com/ansiboy/dilu
  *  
  *  Copyright (c) 2016-2018, shu mai <ansiboy@163.com>
@@ -757,10 +757,7 @@ exports.rules = rules_1.rules;
 
 Object.defineProperty(exports, "__esModule", {
   value: true
-});
-
-var formValidator_1 = __webpack_require__(/*! ./formValidator */ "./out-es5/formValidator.js"); // namespace dilu {
-
+}); // namespace dilu {
 
 var ruleRegex = /^(.+?)\[(.+)\]$/,
     numericRegex = /^[0-9]+$/,
@@ -850,7 +847,7 @@ exports.rules = {
    */
   matches: function matches(otherElement, error) {
     var validate = function validate(value) {
-      return value == formValidator_1.FormValidator.elementValue(otherElement);
+      return value == otherElement.value;
     };
 
     return createValidation(validate, error || msgs.required);
