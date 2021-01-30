@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.rules = exports.FormValidator = void 0;
 var formValidator_1 = require("./formValidator");
-exports.FormValidator = formValidator_1.FormValidator;
+Object.defineProperty(exports, "FormValidator", { enumerable: true, get: function () { return formValidator_1.FormValidator; } });
 var rules_1 = require("./rules");
-exports.rules = rules_1.rules;
+Object.defineProperty(exports, "rules", { enumerable: true, get: function () { return rules_1.rules; } });
+require("./style");

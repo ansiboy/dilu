@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.FormValidator = void 0;
 const errors_1 = require("./errors");
 /**
  * 表单验证器，用于对表单中的字段进行验证

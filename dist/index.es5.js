@@ -1,6 +1,6 @@
 /*!
  * 
- *  maishu-dilu v1.7.1
+ *  maishu-dilu v1.8.3
  *  https://github.com/ansiboy/dilu
  *  
  *  Copyright (c) 2016-2018, shu mai <ansiboy@163.com>
@@ -117,7 +117,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 Object.defineProperty(exports, "__esModule", {
   value: true
-}); // namespace dilu {
+});
+exports.errors = void 0; // namespace dilu {
 
 exports.errors = {
   argumentNull: function argumentNull(parameterName) {
@@ -200,6 +201,7 @@ var __awaiter = void 0 && (void 0).__awaiter || function (thisArg, _arguments, P
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.FormValidator = void 0;
 
 var errors_1 = __webpack_require__(/*! ./errors */ "./out-es5/errors.js");
 /**
@@ -732,14 +734,27 @@ FormValidator.errorClassName = 'validationMessage'; // }
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.rules = exports.FormValidator = void 0;
 
 var formValidator_1 = __webpack_require__(/*! ./formValidator */ "./out-es5/formValidator.js");
 
-exports.FormValidator = formValidator_1.FormValidator;
+Object.defineProperty(exports, "FormValidator", {
+  enumerable: true,
+  get: function get() {
+    return formValidator_1.FormValidator;
+  }
+});
 
 var rules_1 = __webpack_require__(/*! ./rules */ "./out-es5/rules.js");
 
-exports.rules = rules_1.rules;
+Object.defineProperty(exports, "rules", {
+  enumerable: true,
+  get: function get() {
+    return rules_1.rules;
+  }
+});
+
+__webpack_require__(/*! ./style */ "./out-es5/style.js");
 //# sourceMappingURL=index.js.map
 
 
@@ -757,7 +772,8 @@ exports.rules = rules_1.rules;
 
 Object.defineProperty(exports, "__esModule", {
   value: true
-}); // namespace dilu {
+});
+exports.rules = void 0; // namespace dilu {
 
 var ruleRegex = /^(.+?)\[(.+)\]$/,
     numericRegex = /^[0-9]+$/,
@@ -1028,6 +1044,36 @@ function getValidDate(date) {
 
 ; // }
 //# sourceMappingURL=rules.js.map
+
+
+/***/ }),
+
+/***/ "./out-es5/style.js":
+/*!**************************!*\
+  !*** ./out-es5/style.js ***!
+  \**************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var formValidator_1 = __webpack_require__(/*! ./formValidator */ "./out-es5/formValidator.js");
+
+var elementId = "maishu-dilu-style";
+
+if (!document.getElementById(elementId) && document.head != null) {
+  var element = document.createElement('style');
+  element.type = 'text/css';
+  element.id = "maishu-jueying-core-style";
+  document.head.appendChild(element);
+  element.innerHTML = "\n    .".concat(formValidator_1.FormValidator.errorClassName, " {\n        color: red;\n        font-weight: bold;\n    }\n    ");
+}
+//# sourceMappingURL=style.js.map
 
 
 /***/ })

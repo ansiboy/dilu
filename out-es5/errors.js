@@ -2,7 +2,8 @@
 
 Object.defineProperty(exports, "__esModule", {
   value: true
-}); // namespace dilu {
+});
+exports.errors = void 0; // namespace dilu {
 
 exports.errors = {
   argumentNull: function argumentNull(parameterName) {

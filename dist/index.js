@@ -1,6 +1,6 @@
 /*!
  * 
- *  maishu-dilu v1.7.1
+ *  maishu-dilu v1.8.3
  *  https://github.com/ansiboy/dilu
  *  
  *  Copyright (c) 2016-2018, shu mai <ansiboy@163.com>
@@ -115,6 +115,7 @@ return /******/ (function(modules) { // webpackBootstrap
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.errors = void 0;
 // namespace dilu {
 exports.errors = {
     argumentNull(parameterName) {
@@ -165,6 +166,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.FormValidator = void 0;
 const errors_1 = __webpack_require__(/*! ./errors */ "./out/errors.js");
 /**
  * 表单验证器，用于对表单中的字段进行验证
@@ -459,10 +461,12 @@ FormValidator.errorClassName = 'validationMessage';
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.rules = exports.FormValidator = void 0;
 var formValidator_1 = __webpack_require__(/*! ./formValidator */ "./out/formValidator.js");
-exports.FormValidator = formValidator_1.FormValidator;
+Object.defineProperty(exports, "FormValidator", { enumerable: true, get: function () { return formValidator_1.FormValidator; } });
 var rules_1 = __webpack_require__(/*! ./rules */ "./out/rules.js");
-exports.rules = rules_1.rules;
+Object.defineProperty(exports, "rules", { enumerable: true, get: function () { return rules_1.rules; } });
+__webpack_require__(/*! ./style */ "./out/style.js");
 
 
 /***/ }),
@@ -477,6 +481,7 @@ exports.rules = rules_1.rules;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.rules = void 0;
 // namespace dilu {
 var ruleRegex = /^(.+?)\[(.+)\]$/, numericRegex = /^[0-9]+$/, integerRegex = /^\-?[0-9]+$/, decimalRegex = /^\-?[0-9]*\.?[0-9]+$/, emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/, alphaRegex = /^[a-z]+$/i, alphaNumericRegex = /^[a-z0-9]+$/i, alphaDashRegex = /^[a-z0-9_\-]+$/i, naturalRegex = /^[0-9]+$/i, naturalNoZeroRegex = /^[1-9][0-9]*$/i, ipRegex = /^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})$/i, base64Regex = /[^a-zA-Z0-9\/\+=]/i, numericDashRegex = /^[\d\-\s]+$/, urlRegex = /^((http|https):\/\/(\w+:{0,1}\w*@)?(\S+)|)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/, mobileRegex = /^1[34578]\d{9}$/, dateRegex = /\d{4}-\d{1,2}-\d{1,2}/;
 let msgs = {
@@ -676,6 +681,34 @@ function getValidDate(date) {
 }
 ;
 // }
+
+
+/***/ }),
+
+/***/ "./out/style.js":
+/*!**********************!*\
+  !*** ./out/style.js ***!
+  \**********************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const formValidator_1 = __webpack_require__(/*! ./formValidator */ "./out/formValidator.js");
+let elementId = "maishu-dilu-style";
+if (!document.getElementById(elementId) && document.head != null) {
+    let element = document.createElement('style');
+    element.type = 'text/css';
+    element.id = "maishu-jueying-core-style";
+    document.head.appendChild(element);
+    element.innerHTML = `
+    .${formValidator_1.FormValidator.errorClassName} {
+        color: red;
+        font-weight: bold;
+    }
+    `;
+}
 
 
 /***/ })

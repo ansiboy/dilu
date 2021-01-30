@@ -50,13 +50,13 @@ export declare let rules: {
      * @param value 指定的值
      * @param error 错误提示文字
      */
-    lessThan(value: Value<string | number | Date>, error?: ErrorInfo): Rule;
+    lessThan(value: Value<number | Date | string>, error?: ErrorInfo): Rule;
     /**
      * 验证字段等于指定的值
      * @param value 指定的值
      * @param error 错误提示文字
      */
-    equal(value: Value<string | number | Date>, error?: ErrorInfo): Rule;
+    equal(value: Value<number | Date | string>, error?: ErrorInfo): Rule;
     /**
      * 验证字段为 IP
      * @param error 错误提示文字

@@ -2,7 +2,8 @@
 
 Object.defineProperty(exports, "__esModule", {
   value: true
-}); // namespace dilu {
+});
+exports.rules = void 0; // namespace dilu {
 
 var ruleRegex = /^(.+?)\[(.+)\]$/,
     numericRegex = /^[0-9]+$/,
