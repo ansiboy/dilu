@@ -1,6 +1,6 @@
 /*!
  * 
- *  maishu-dilu v1.8.3
+ *  maishu-dilu v1.8.6
  *  https://github.com/ansiboy/dilu
  *  
  *  Copyright (c) 2016-2018, shu mai <ansiboy@163.com>
@@ -537,7 +537,7 @@ exports.rules = {
      * @param error 错误提示文字
      */
     required(error) {
-        let validate = (value) => value != '';
+        let validate = (value) => (value || "") != '';
         return createValidation(validate, error || msgs.required);
     },
     /**

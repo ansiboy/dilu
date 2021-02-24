@@ -1,6 +1,6 @@
 /*!
  * 
- *  maishu-dilu v1.8.3
+ *  maishu-dilu v1.8.6
  *  https://github.com/ansiboy/dilu
  *  
  *  Copyright (c) 2016-2018, shu mai <ansiboy@163.com>
@@ -850,7 +850,7 @@ exports.rules = {
    */
   required: function required(error) {
     var validate = function validate(value) {
-      return value != '';
+      return (value || "") != '';
     };
 
     return createValidation(validate, error || msgs.required);

@@ -80,7 +80,7 @@ exports.rules = {
    */
   required: function required(error) {
     var validate = function validate(value) {
-      return value != '';
+      return (value || "") != '';
     };
 
     return createValidation(validate, error || msgs.required);

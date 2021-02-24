@@ -84,7 +84,7 @@ export let rules = {
      * @param error 错误提示文字
      */
     required(error?: ErrorInfo) {
-        let validate = (value) => value != '';
+        let validate = (value) => (value || "") != '';
         return createValidation(validate, error || msgs.required);
     },
     /**

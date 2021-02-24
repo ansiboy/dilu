@@ -56,7 +56,7 @@ exports.rules = {
      * @param error 错误提示文字
      */
     required(error) {
-        let validate = (value) => value != '';
+        let validate = (value) => (value || "") != '';
         return createValidation(validate, error || msgs.required);
     },
     /**
