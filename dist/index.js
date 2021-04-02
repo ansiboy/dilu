@@ -1,6 +1,6 @@
 /*!
  * 
- *  maishu-dilu v1.9.1
+ *  maishu-dilu v1.9.2
  *  https://github.com/ansiboy/dilu
  *  
  *  Copyright (c) 2016-2018, shu mai <ansiboy@163.com>
@@ -255,7 +255,7 @@ class FormValidator {
         for (let i = 0; i < this.fields.length; i++) {
             let field = this.fields[i];
             let element = this.fieldElement(field);
-            if (field.condition && field.condition(element) == false)
+            if (field.condition && field.condition(element, this.form, this) == false)
                 continue;
             let p = this.checkField(field);
             ps.push(p);
@@ -272,7 +272,7 @@ class FormValidator {
             for (let i = 0; i < this.fields.length; i++) {
                 let field = this.fields[i];
                 let element = this.fieldElement(field);
-                if (field.condition && field.condition(element) == false)
+                if (field.condition && field.condition(element, this.form, this) == false)
                     continue;
                 let p = this.checkFieldAsync(field);
                 ps.push(p);

@@ -1,6 +1,6 @@
 {
     "name": "maishu-dilu",
-    "version": "1.9.1",
+    "version": "1.9.2",
     "main": "dist/index.js",
     "types": "./out/index.d.ts",
     "scripts": {

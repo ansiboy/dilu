@@ -1,6 +1,6 @@
 /*!
  * 
- *  maishu-dilu v1.9.1
+ *  maishu-dilu v1.9.2
  *  https://github.com/ansiboy/dilu
  *  
  *  Copyright (c) 2016-2018, shu mai <ansiboy@163.com>
@@ -364,7 +364,7 @@ function () {
       for (var i = 0; i < this.fields.length; i++) {
         var field = this.fields[i];
         var element = this.fieldElement(field);
-        if (field.condition && field.condition(element) == false) continue;
+        if (field.condition && field.condition(element, this.form, this) == false) continue;
         var p = this.checkField(field);
         ps.push(p);
       }
@@ -401,7 +401,7 @@ function () {
                 field = this.fields[i];
                 element = this.fieldElement(field);
 
-                if (!(field.condition && field.condition(element) == false)) {
+                if (!(field.condition && field.condition(element, this.form, this) == false)) {
                   _context.next = 7;
                   break;
                 }

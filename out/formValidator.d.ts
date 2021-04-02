@@ -8,7 +8,7 @@ export declare type ValidateField = {
     rules: Rule[];
     errorElement?: HTMLElement;
     depends?: (((element: InputElement) => Promise<boolean>) | ((element: InputElement) => boolean))[];
-    condition?: (element: InputElement) => boolean;
+    condition?: (inputElement: InputElement, formElement: HTMLElement, validator: FormValidator) => boolean;
 };
 /**
  * 表单验证器，用于对表单中的字段进行验证
