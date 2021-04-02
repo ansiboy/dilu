@@ -10,7 +10,7 @@ export type ValidateField = {
     rules: Rule[],
     errorElement?: HTMLElement,
     depends?: (((element: InputElement) => Promise<boolean>) | ((element: InputElement) => boolean))[],
-    condition?: (element: InputElement) => boolean,
+    condition?: (inputElement: InputElement, formElement: HTMLElement, validator: FormValidator) => boolean,
 };
 
 /**
@@ -114,7 +114,7 @@ export class FormValidator {
         for (let i = 0; i < this.fields.length; i++) {
             let field = this.fields[i];
             let element = this.fieldElement(field)
-            if (field.condition && field.condition(element) == false)
+            if (field.condition && field.condition(element, this.form, this) == false)
                 continue;
 
             let p = this.checkField(field);
@@ -133,7 +133,7 @@ export class FormValidator {
         for (let i = 0; i < this.fields.length; i++) {
             let field = this.fields[i];
             let element = this.fieldElement(field)
-            if (field.condition && field.condition(element) == false)
+            if (field.condition && field.condition(element, this.form, this) == false)
                 continue;
 
             let p = this.checkFieldAsync(field);
