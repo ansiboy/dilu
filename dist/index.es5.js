@@ -1,6 +1,6 @@
 /*!
  * 
- *  maishu-dilu v1.9.2
+ *  maishu-dilu v1.9.6
  *  https://github.com/ansiboy/dilu
  *  
  *  Copyright (c) 2016-2018, shu mai <ansiboy@163.com>
