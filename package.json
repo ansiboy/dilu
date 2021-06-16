@@ -1,7 +1,7 @@
 {
     "name": "maishu-dilu",
-    "version": "1.10.0",
-    "main": "dist/index.js",
+    "version": "1.10.1",
+    "main": "out/index.js",
     "types": "./out/index.d.ts",
     "scripts": {
         "build": "grunt default"

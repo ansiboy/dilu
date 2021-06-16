@@ -1,6 +1,6 @@
 /*!
  * 
- *  maishu-dilu v1.9.6
+ *  maishu-dilu v1.10.1
  *  https://github.com/ansiboy/dilu
  *  
  *  Copyright (c) 2016-2018, shu mai <ansiboy@163.com>
@@ -1066,12 +1066,14 @@ var formValidator_1 = __webpack_require__(/*! ./formValidator */ "./out-es5/form
 
 var elementId = "maishu-dilu-style";
 
-if (!document.getElementById(elementId) && document.head != null) {
-  var element = document.createElement('style');
-  element.type = 'text/css';
-  element.id = elementId;
-  document.head.appendChild(element);
-  element.innerHTML = "\n    .".concat(formValidator_1.FormValidator.errorClassName, " {\n        color: red;\n        font-weight: bold;\n    }\n    ");
+if (document != undefined) {
+  if (!document.getElementById(elementId) && document.head != null) {
+    var element = document.createElement('style');
+    element.type = 'text/css';
+    element.id = elementId;
+    document.head.appendChild(element);
+    element.innerHTML = "\n        .".concat(formValidator_1.FormValidator.errorClassName, " {\n            color: red;\n            font-weight: bold;\n        }\n        ");
+  }
 }
 //# sourceMappingURL=style.js.map
 

@@ -1,6 +1,6 @@
 /*!
  * 
- *  maishu-dilu v1.9.6
+ *  maishu-dilu v1.10.1
  *  https://github.com/ansiboy/dilu
  *  
  *  Copyright (c) 2016-2018, shu mai <ansiboy@163.com>
@@ -697,17 +697,19 @@ function getValidDate(date) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const formValidator_1 = __webpack_require__(/*! ./formValidator */ "./out/formValidator.js");
 let elementId = "maishu-dilu-style";
-if (!document.getElementById(elementId) && document.head != null) {
-    let element = document.createElement('style');
-    element.type = 'text/css';
-    element.id = elementId;
-    document.head.appendChild(element);
-    element.innerHTML = `
-    .${formValidator_1.FormValidator.errorClassName} {
-        color: red;
-        font-weight: bold;
+if (document != undefined) {
+    if (!document.getElementById(elementId) && document.head != null) {
+        let element = document.createElement('style');
+        element.type = 'text/css';
+        element.id = elementId;
+        document.head.appendChild(element);
+        element.innerHTML = `
+        .${formValidator_1.FormValidator.errorClassName} {
+            color: red;
+            font-weight: bold;
+        }
+        `;
     }
-    `;
 }
 
 
