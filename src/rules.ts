@@ -1,3 +1,4 @@
+import { errors } from "./errors";
 import { InputElement, FormValidator } from "./formValidator";
 
 // namespace dilu {
@@ -17,7 +18,8 @@ var ruleRegex = /^(.+?)\[(.+)\]$/,
     numericDashRegex = /^[\d\-\s]+$/,
     urlRegex = /^((http|https):\/\/(\w+:{0,1}\w*@)?(\S+)|)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/,
     mobileRegex = /^1[34578]\d{9}$/,
-    dateRegex = /\d{4}-\d{1,2}-\d{1,2}/;
+    dateRegex = /\d{4}-\d{1,2}-\d{1,2}/,
+    guidRegex = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})|[0-9]+$/i;
 
 let msgs = {
     required: '%s不能为空',
@@ -49,7 +51,8 @@ let msgs = {
     greater_than_or_equal_date: 'The %s field must contain a date that\'s at least as recent as %s.',
     less_than_or_equal_date: 'The %s field must contain a date that\'s %s or older.',
     mobile: '请输入正确的手机号码',
-    custom: '请输入正确制',
+    custom: '请输入正确的数据',
+    guid: "请输入正确的 GUID"
 }
 
 export type Validate = (value) => boolean | Promise<boolean>;
@@ -188,6 +191,14 @@ export let rules = {
      */
     custom(validate: (value) => boolean | Promise<boolean>, error?: ErrorInfo) {
         return createValidation(validate, error || msgs.custom);
+    },
+    /**
+     * 验证字段为 GUID
+     * @param error 错误提示文字
+     */
+    guid(error?: ErrorInfo) {
+        var validate = (value) => guidRegex.test(value);
+        return createValidation(validate, error || msgs.guid)
     }
 };
 
