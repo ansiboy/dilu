@@ -83,4 +83,9 @@ export declare let rules: {
      * @param error 错误提示文字
      */
     custom(validate: (value: any) => boolean | Promise<boolean>, error?: ErrorInfo): Rule;
+    /**
+     * 验证字段为 GUID
+     * @param error 错误提示文字
+     */
+    guid(error?: ErrorInfo): Rule;
 };

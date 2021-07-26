@@ -8,7 +8,7 @@ var formValidator_1 = require("./formValidator");
 
 var elementId = "maishu-dilu-style";
 
-if (document != undefined) {
+if (typeof document != "undefined") {
   if (!document.getElementById(elementId) && document.head != null) {
     var element = document.createElement('style');
     element.type = 'text/css';

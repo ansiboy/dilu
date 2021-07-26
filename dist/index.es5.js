@@ -1,6 +1,6 @@
 /*!
  * 
- *  maishu-dilu v1.10.1
+ *  maishu-dilu v1.10.6
  *  https://github.com/ansiboy/dilu
  *  
  *  Copyright (c) 2016-2018, shu mai <ansiboy@163.com>
@@ -790,7 +790,8 @@ var ruleRegex = /^(.+?)\[(.+)\]$/,
     numericDashRegex = /^[\d\-\s]+$/,
     urlRegex = /^((http|https):\/\/(\w+:{0,1}\w*@)?(\S+)|)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/,
     mobileRegex = /^1[34578]\d{9}$/,
-    dateRegex = /\d{4}-\d{1,2}-\d{1,2}/;
+    dateRegex = /\d{4}-\d{1,2}-\d{1,2}/,
+    guidRegex = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})|[0-9]+$/i;
 var msgs = {
   required: '%s不能为空',
   matches: '%s与%s不匹配',
@@ -821,7 +822,8 @@ var msgs = {
   greater_than_or_equal_date: 'The %s field must contain a date that\'s at least as recent as %s.',
   less_than_or_equal_date: 'The %s field must contain a date that\'s %s or older.',
   mobile: '请输入正确的手机号码',
-  custom: '请输入正确制'
+  custom: '请输入正确的数据',
+  guid: "请输入正确的 GUID"
 };
 
 function createValidation(validate, error) {
@@ -1001,6 +1003,18 @@ exports.rules = {
    */
   custom: function custom(validate, error) {
     return createValidation(validate, error || msgs.custom);
+  },
+
+  /**
+   * 验证字段为 GUID
+   * @param error 错误提示文字
+   */
+  guid: function guid(error) {
+    var validate = function validate(value) {
+      return guidRegex.test(value);
+    };
+
+    return createValidation(validate, error || msgs.guid);
   }
 };
 
@@ -1066,7 +1080,7 @@ var formValidator_1 = __webpack_require__(/*! ./formValidator */ "./out-es5/form
 
 var elementId = "maishu-dilu-style";
 
-if (document != undefined) {
+if (typeof document != "undefined") {
   if (!document.getElementById(elementId) && document.head != null) {
     var element = document.createElement('style');
     element.type = 'text/css';

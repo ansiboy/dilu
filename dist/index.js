@@ -1,6 +1,6 @@
 /*!
  * 
- *  maishu-dilu v1.10.1
+ *  maishu-dilu v1.10.6
  *  https://github.com/ansiboy/dilu
  *  
  *  Copyright (c) 2016-2018, shu mai <ansiboy@163.com>
@@ -483,7 +483,7 @@ __webpack_require__(/*! ./style */ "./out/style.js");
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.rules = void 0;
 // namespace dilu {
-var ruleRegex = /^(.+?)\[(.+)\]$/, numericRegex = /^[0-9]+$/, integerRegex = /^\-?[0-9]+$/, decimalRegex = /^\-?[0-9]*\.?[0-9]+$/, emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/, alphaRegex = /^[a-z]+$/i, alphaNumericRegex = /^[a-z0-9]+$/i, alphaDashRegex = /^[a-z0-9_\-]+$/i, naturalRegex = /^[0-9]+$/i, naturalNoZeroRegex = /^[1-9][0-9]*$/i, ipRegex = /^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})$/i, base64Regex = /[^a-zA-Z0-9\/\+=]/i, numericDashRegex = /^[\d\-\s]+$/, urlRegex = /^((http|https):\/\/(\w+:{0,1}\w*@)?(\S+)|)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/, mobileRegex = /^1[34578]\d{9}$/, dateRegex = /\d{4}-\d{1,2}-\d{1,2}/;
+var ruleRegex = /^(.+?)\[(.+)\]$/, numericRegex = /^[0-9]+$/, integerRegex = /^\-?[0-9]+$/, decimalRegex = /^\-?[0-9]*\.?[0-9]+$/, emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/, alphaRegex = /^[a-z]+$/i, alphaNumericRegex = /^[a-z0-9]+$/i, alphaDashRegex = /^[a-z0-9_\-]+$/i, naturalRegex = /^[0-9]+$/i, naturalNoZeroRegex = /^[1-9][0-9]*$/i, ipRegex = /^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})$/i, base64Regex = /[^a-zA-Z0-9\/\+=]/i, numericDashRegex = /^[\d\-\s]+$/, urlRegex = /^((http|https):\/\/(\w+:{0,1}\w*@)?(\S+)|)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/, mobileRegex = /^1[34578]\d{9}$/, dateRegex = /\d{4}-\d{1,2}-\d{1,2}/, guidRegex = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})|[0-9]+$/i;
 let msgs = {
     required: '%s不能为空',
     matches: '%s与%s不匹配',
@@ -514,7 +514,8 @@ let msgs = {
     greater_than_or_equal_date: 'The %s field must contain a date that\'s at least as recent as %s.',
     less_than_or_equal_date: 'The %s field must contain a date that\'s %s or older.',
     mobile: '请输入正确的手机号码',
-    custom: '请输入正确制',
+    custom: '请输入正确的数据',
+    guid: "请输入正确的 GUID"
 };
 function createValidation(validate, error) {
     return {
@@ -641,6 +642,14 @@ exports.rules = {
      */
     custom(validate, error) {
         return createValidation(validate, error || msgs.custom);
+    },
+    /**
+     * 验证字段为 GUID
+     * @param error 错误提示文字
+     */
+    guid(error) {
+        var validate = (value) => guidRegex.test(value);
+        return createValidation(validate, error || msgs.guid);
     }
 };
 function elementValueCompare(value, otherValue) {
@@ -697,7 +706,7 @@ function getValidDate(date) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const formValidator_1 = __webpack_require__(/*! ./formValidator */ "./out/formValidator.js");
 let elementId = "maishu-dilu-style";
-if (document != undefined) {
+if (typeof document != "undefined") {
     if (!document.getElementById(elementId) && document.head != null) {
         let element = document.createElement('style');
         element.type = 'text/css';
